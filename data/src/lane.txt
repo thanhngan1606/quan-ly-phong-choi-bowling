@@ -1,0 +1,5 @@
+L1|Lane 1|rảnh|150.0|-
+L2|Lane 2|bảo trì|150.0|có
+L3|Lane 3|đang chơi|180.0|-
+005|lane 6|trống |90000.0|không
+L4|Lane 4|rảnh |200.0|không
