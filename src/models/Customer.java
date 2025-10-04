@@ -1,19 +1,19 @@
 package models;
 
 public class Customer {
-    private String MaKH;
-    private String Ten;
-    private String Sdt;
-    private String Vip;
-    private int DiemThuong;
+    private String maKH;
+    private String ten;
+    private String sdt;
+    private String vip;
+    private int diemThuong;
 
     public Customer() {}
-    public Customer(String MaKH, String Ten, String Sdt, String Vip, int DiemThuong) {
-        this.MaKH = MaKH;
-        this.Ten = Ten;
-        this.Sdt = Sdt;
-        this.Vip = Vip;
-        this.DiemThuong = DiemThuong;
+    public Customer(String maKH, String ten, String sdt, String vip, int diemThuong) {
+        this.maKH = maKH;
+        this.ten = ten;
+        this.sdt = sdt;
+        this.vip = vip;
+        this.diemThuong = diemThuong;
     }
 
     // Getter / Setter ...
