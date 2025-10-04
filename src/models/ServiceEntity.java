@@ -1,20 +1,20 @@
 package models;
 
 public class ServiceEntity {
-    private String MaDV;
-    private String MaPhien;
-    private String TenDV;
-    private int SoLuong;
-    private double Gia;
-    private double ThanhTien;
+    private String maDV;
+    private String maPhien;
+    private String tenDV;
+    private int soLuong;
+    private double gia;
+    private double thanhTien;
     public ServiceEntity() {}
-    public ServiceEntity(String MaDV, String MaPhien, String TenDV, int SoLuong, double Gia) {
-        this.MaDV = MaDV;
-        this.MaPhien = MaPhien;
-        this.TenDV = TenDV;
-        this.SoLuong = SoLuong;
-        this.Gia = Gia;
-        this.ThanhTien = SoLuong * Gia; // tự động tính thành tiền
+    public ServiceEntity(String maDV, String maPhien, String tenDV, int soLuong, double gia) {
+        this.maDV = maDV;
+        this.maPhien = maPhien;
+        this.tenDV = tenDV;
+        this.soLuong = soLuong;
+        this.gia = gia;
+        this.thanhTien = soLuong * gia; // tự động tính thành tiền
     }
 
     // Getter / Setter ...
