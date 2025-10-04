@@ -31,14 +31,18 @@ public class LaneService {
         writeLanesToFile(lanes);
     }
 
-    public Lane findLaneByMaHoacTen(String searchTerm) {
+    public List<Lane> findLanes(String searchTerm, String trangThai) {
         List<Lane> lanes = readLanes();
+        List<Lane> result = new ArrayList<>();
         for (Lane lane : lanes) {
-            if (lane.getMaLane().equals(searchTerm) || lane.getTenLane().equalsIgnoreCase(searchTerm)) {
-                return lane;
+            boolean matchMaHoacTen = searchTerm == null || searchTerm.isEmpty() ||
+                    lane.getMaLane().equals(searchTerm) || lane.getTenLane().equalsIgnoreCase(searchTerm);
+            boolean matchTrangThai = trangThai == null || trangThai.isEmpty() || lane.getTrangThai().equalsIgnoreCase(trangThai);
+            if (matchMaHoacTen && matchTrangThai) {
+                result.add(lane);
             }
         }
-        return null;
+        return result;
     }
 
     public List<Lane> getAllLanes() {

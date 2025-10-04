@@ -28,6 +28,6 @@ public class Lane {
 
     @Override
     public String toString() {
-        return maLane + "," + tenLane + "," + trangThai + "," + gia + "," + baoTri;
+        return maLane + "|" + tenLane + "|" + trangThai + "|" + gia + "|" + baoTri;
     }
 }

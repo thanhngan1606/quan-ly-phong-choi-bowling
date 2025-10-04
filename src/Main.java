@@ -13,7 +13,7 @@ public class Main {
             System.out.println("1. Thêm lane mới");
             System.out.println("2. Sửa lane");
             System.out.println("3. Xóa lane");
-            System.out.println("4. Tìm kiếm lane (theo mã hoặc tên)");
+            System.out.println("4. Tìm kiếm lane (theo mã, tên, hoặc trạng thái)");
             System.out.println("5. Hiển thị tất cả lane");
             System.out.println("6. Quản lý trạng thái lane");
             System.out.println("0. Thoát");
@@ -71,7 +71,7 @@ public class Main {
     private static void suaLane() {
         System.out.print("Nhập mã lane cần sửa: ");
         String maLane = scanner.nextLine();
-        Lane existingLane = laneService.findLaneByMaHoacTen(maLane);
+        Lane existingLane = laneService.findLanes(maLane, null).get(0); // Lấy lane đầu tiên khớp
         if (existingLane == null) {
             System.out.println("Không tìm thấy lane!");
             return;
@@ -100,13 +100,19 @@ public class Main {
     }
 
     private static void timKiemLane() {
-        System.out.print("Nhập mã hoặc tên lane để tìm kiếm: ");
+        System.out.print("Nhập mã hoặc tên lane để tìm kiếm (hoặc Enter để bỏ qua): ");
         String searchTerm = scanner.nextLine();
-        Lane lane = laneService.findLaneByMaHoacTen(searchTerm);
-        if (lane != null) {
-            System.out.println("Kết quả: " + lane);
+        System.out.print("Nhập trạng thái (trống/đang chơi/bảo trì, hoặc Enter để bỏ qua): ");
+        String trangThai = scanner.nextLine();
+
+        List<Lane> lanes = laneService.findLanes(searchTerm, trangThai);
+        if (lanes.isEmpty()) {
+            System.out.println("Không tìm thấy lane nào!");
         } else {
-            System.out.println("Không tìm thấy lane!");
+            System.out.println("Kết quả tìm kiếm:");
+            for (Lane lane : lanes) {
+                System.out.println(lane);
+            }
         }
     }
 
@@ -125,7 +131,7 @@ public class Main {
     private static void quanLyTrangThai() {
         System.out.print("Nhập mã lane để quản lý trạng thái: ");
         String maLane = scanner.nextLine();
-        Lane lane = laneService.findLaneByMaHoacTen(maLane);
+        Lane lane = laneService.findLanes(maLane, null).get(0); // Lấy lane đầu tiên khớp
         if (lane == null) {
             System.out.println("Không tìm thấy lane!");
             return;
