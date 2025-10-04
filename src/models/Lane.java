@@ -1,21 +1,20 @@
 package models;
 
 public class Lane {
-    private String MaLane;
-    private String  Ten;
+  private String maLane;
+    private String tenLane;
+    private String trangThai;
+    private double gia;
+    private String baoTri;
 
-    private String Gia;
-    private String TrangThai;
-    private  String BaoTri;
-
-    public Lane() {}
-    public Lane(String MaLane, String Ten, String TrangThai, String BaoTri, String Gia) {
-        this.MaLane = MaLane;
-        this.Ten = Ten;
-        this.TrangThai = TrangThai;
-        this.Gia = Gia;
-        this.BaoTri = BaoTri;
+    public Lane(String maLane, String tenLane, String trangThai, double gia, String baoTri) {
+        this.maLane = maLane;
+        this.tenLane = tenLane;
+        this.trangThai = trangThai;
+        this.gia = gia;
+        this.baoTri = baoTri;
     }
+    
 
     // Getter / Setter ...
 }
