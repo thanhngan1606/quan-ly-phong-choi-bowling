@@ -7,11 +7,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         // Khởi tạo service với file dữ liệu
-        CustomerService customerService = new CustomerService(Path.of("data/src/customer.txt"));
-        LaneService laneService = new LaneService(Path.of("data/src/lane.txt"));
-        ServiceEntityService serviceEntityService = new ServiceEntityService(Path.of("data/service.txt"));
-        ShoeRentalService shoeRentalService = new ShoeRentalService(Path.of("data/shoe.txt"));
-        GameSessionService gameSessionService = new GameSessionService(Path.of("data/gamesessions.txt"));
+        
 
         Scanner sc = new Scanner(System.in);
         int choice;
