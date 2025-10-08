@@ -1,4 +1,3 @@
-
 package service;
 
 import models.Lane;
@@ -32,7 +31,7 @@ public class LaneService {
         writeLanesToFile(lanes);
     }
 
-    public List<Lane> findLanesByCriteria(String searchTerm, String trangThai) {
+    public List<Lane> findLanes(String searchTerm, String trangThai) {
         List<Lane> lanes = readLanes();
         List<Lane> result = new ArrayList<>();
         for (Lane lane : lanes) {
