@@ -76,6 +76,31 @@ public class ServiceEntityService {
         }
     }
 
+    public void update(String ma, ServiceEntity newS) {
+        if (ma == null || newS == null) {
+            System.out.println("Invalid parameters!");
+            return;
+        }
+
+        boolean found = false;
+        for (int i = 0; i < services.size(); i++) {
+            ServiceEntity s = services.get(i);
+            if (s.getMaDV().equals(ma)) {
+                s.setMaPhien(newS.getMaPhien());
+                s.setTenDV(newS.getTenDV());
+                s.setSoLuong(newS.getSoLuong());
+                s.setGia(newS.getGia());
+                found = true;
+                System.out.println("Service updated with ID " + ma);
+                saveToFile();
+                break;
+            }
+        }
+
+        if (!found) {
+            System.out.println("Service with ID " + ma + " not found");
+        }
+    }
 
     public void delete(String ma) {
         boolean removed = services.removeIf(s -> s.getMaDV().equals(ma));
@@ -87,6 +112,28 @@ public class ServiceEntityService {
         }
     }
 
+    public ServiceEntity find(String ma) {
+        if (ma == null) return null;
+        for (ServiceEntity s : services) {
+            if (s.getMaDV().equals(ma)) {
+                return s;
+            }
+        }
+        return null;
+    }
+    public void update(String ma, String maPhien, String tenDV, int soLuong, double gia) {
+        ServiceEntity s = find(ma);
+        if (s != null) {
+            s.setMaPhien(maPhien);
+            s.setTenDV(tenDV);
+            s.setSoLuong(soLuong);
+            s.setGia(gia);
+            saveToFile();
+            System.out.println("Service updated with ID " + ma);
+        } else {
+            System.out.println("Service with ID " + ma + " not found");
+        }
+    }
 }
 
 
