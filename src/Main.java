@@ -4,8 +4,14 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Main {
+    public static void main(String[] args) {
+        // Khởi tạo service với file dữ liệu
+ 
+        Scanner sc = new Scanner(System.in);
+        int choice;
     private static LaneService laneService = new LaneService();
     private static Scanner scanner = new Scanner(System.in);
+
 
     public static void main(String[] args) {
         while (true) {
