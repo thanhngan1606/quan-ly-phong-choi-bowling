@@ -1,6 +1,8 @@
 package models;
 
-public class Lane {
+import java.io.Serializable;
+
+public class Lane implements Serializable {
     private String maLane;
     private String tenLane;
     private String trangThai;

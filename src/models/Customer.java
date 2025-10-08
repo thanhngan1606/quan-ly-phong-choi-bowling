@@ -1,6 +1,8 @@
 package models;
 
-public class Customer {
+import java.io.Serializable;
+
+public class Customer implements Serializable {
     private String maKH;
     private String ten;
     private String sdt;
@@ -17,45 +19,16 @@ public class Customer {
         this.diemThuong = diemThuong;
     }
 
-    public String getMaKH() {
-        return maKH;
-    }
-
-    public void setMaKH(String maKH) {
-        this.maKH = maKH;
-    }
-
-    public String getTen() {
-        return ten;
-    }
-
-    public void setTen(String ten) {
-        this.ten = ten;
-    }
-
-    public String getSdt() {
-        return sdt;
-    }
-
-    public void setSdt(String sdt) {
-        this.sdt = sdt;
-    }
-
-    public boolean isVip() {
-        return vip;
-    }
-
-    public void setVip(boolean vip) {
-        this.vip = vip;
-    }
-
-    public int getDiemThuong() {
-        return diemThuong;
-    }
-
-    public void setDiemThuong(int diemThuong) {
-        this.diemThuong = diemThuong;
-    }
+    public String getMaKH() { return maKH; }
+    public void setMaKH(String maKH) { this.maKH = maKH; }
+    public String getTen() { return ten; }
+    public void setTen(String ten) { this.ten = ten; }
+    public String getSdt() { return sdt; }
+    public void setSdt(String sdt) { this.sdt = sdt; }
+    public boolean isVip() { return vip; }
+    public void setVip(boolean vip) { this.vip = vip; }
+    public int getDiemThuong() { return diemThuong; }
+    public void setDiemThuong(int diemThuong) { this.diemThuong = diemThuong; }
 
     @Override
     public String toString() {

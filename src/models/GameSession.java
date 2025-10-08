@@ -1,9 +1,10 @@
 package models;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class GameSession {
+public class GameSession implements Serializable {
     private String maPhien;
     private String maKH;
     private String maLane;
@@ -23,26 +24,19 @@ public class GameSession {
         this.tongTien = tongTien;
     }
 
-    // --- Getter & Setter ---
     public String getMaPhien() { return maPhien; }
     public void setMaPhien(String maPhien) { this.maPhien = maPhien; }
-
     public String getMaKH() { return maKH; }
     public void setMaKH(String maKH) { this.maKH = maKH; }
-
     public String getMaLane() { return maLane; }
     public void setMaLane(String maLane) { this.maLane = maLane; }
-
     public LocalDateTime getThoiGianBatDau() { return thoiGianBatDau; }
     public void setThoiGianBatDau(LocalDateTime thoiGianBatDau) { this.thoiGianBatDau = thoiGianBatDau; }
-
     public LocalDateTime getThoiGianKetThuc() { return thoiGianKetThuc; }
     public void setThoiGianKetThuc(LocalDateTime thoiGianKetThuc) { this.thoiGianKetThuc = thoiGianKetThuc; }
-
     public double getTongTien() { return tongTien; }
     public void setTongTien(double tongTien) { this.tongTien = tongTien; }
 
-    // --- Định dạng thời gian & serialize ---
     public static final DateTimeFormatter F = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public static GameSession parse(String line) {

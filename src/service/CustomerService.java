@@ -6,7 +6,7 @@ import models.Customer;
 
 public class CustomerService {
     private static Scanner scanner = new Scanner(System.in);
-    private static final String DATA_FILE = "customers.txt";
+    private static final String DATA_FILE = "C://dev//quan-ly-phong-choi-bowling//data//src//customer.txt";
 
     interface Validator {
         boolean validate(String value);
@@ -16,9 +16,9 @@ public class CustomerService {
         String input;
         while (true) {
             System.out.print(prompt);
-            input = scanner.nextLine().trim(); // Lấy đầu vào và loại bỏ khoảng trắng dư thừa
+            input = scanner.nextLine().trim();
             if (validator.validate(input)) {
-                return input; // Hợp lệ, trả về và thoát khỏi vòng lặp
+                return input;
             } else {
                 System.out.println("Lỗi: " + errorMessage + " Vui lòng nhập lại.");
             }
@@ -31,44 +31,23 @@ public class CustomerService {
         loadFromFile();
     }
 
+    @SuppressWarnings("unchecked")
     public void loadFromFile() {
         File file = new File(DATA_FILE);
         if (!file.exists()) {
             System.out.println("File dữ liệu không tồn tại, khởi tạo danh sách trống.");
             return;
         }
-        try (BufferedReader reader = new BufferedReader(new FileReader(DATA_FILE))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 5) {
-                    String maKH = parts[0].trim();
-                    String tenKH = parts[1].trim();
-                    String soDT = parts[2].trim();
-                    boolean isVip = Boolean.parseBoolean(parts[3].trim());
-                    int diemThuong = Integer.parseInt(parts[4].trim());
-                    Customer c = new Customer(maKH, tenKH, soDT, isVip, diemThuong);
-                    customers.add(c);
-                }
-            }
-        } catch (IOException | NumberFormatException e) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(DATA_FILE))) {
+            customers = (List<Customer>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
             System.out.println("Lỗi khi đọc file: " + e.getMessage());
         }
     }
 
     public void saveToFile() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATA_FILE))) {
-            for (Customer c : customers) {
-                String line = String.join(",",
-                        c.getMaKH(),
-                        c.getTen(),
-                        c.getSdt(),
-                        String.valueOf(c.isVip()),
-                        String.valueOf(c.getDiemThuong())
-                );
-                writer.write(line);
-                writer.newLine();
-            }
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(DATA_FILE))) {
+            oos.writeObject(customers);
         } catch (IOException e) {
             System.out.println("Lỗi khi ghi file: " + e.getMessage());
         }
@@ -106,6 +85,17 @@ public class CustomerService {
             }
         }
         return null;
+    }
+
+    public List<Customer> findAll() {
+        return new ArrayList<>(customers);
+    }
+
+    public List<Customer> searchByNameOrPhone(String searchTerm) {
+        return customers.stream()
+                .filter(c -> c.getTen().toLowerCase().contains(searchTerm.toLowerCase()) ||
+                        c.getSdt().contains(searchTerm))
+                .toList();
     }
 
     public void printAll() {

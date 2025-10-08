@@ -1,6 +1,8 @@
 package models;
 
-public class ServiceEntity {
+import java.io.Serializable;
+
+public class ServiceEntity implements Serializable {
     private String maDV;
     private String maPhien;
     private String tenDV;
@@ -15,58 +17,27 @@ public class ServiceEntity {
         this.tenDV = tenDV;
         this.soLuong = soLuong;
         this.gia = gia;
-        this.thanhTien = soLuong * gia; // tự động tính thành tiền
+        this.thanhTien = soLuong * gia;
     }
 
-    public String getMaDV() {
-        return maDV;
-    }
-
-    public void setMaDV(String maDV) {
-        this.maDV = maDV;
-    }
-
-    public String getMaPhien() {
-        return maPhien;
-    }
-
-    public void setMaPhien(String maPhien) {
-        this.maPhien = maPhien;
-    }
-
-    public String getTenDV() {
-        return tenDV;
-    }
-
-    public void setTenDV(String tenDV) {
-        this.tenDV = tenDV;
-    }
-
-    public int getSoLuong() {
-        return soLuong;
-    }
-
-    public void setSoLuong(int soLuong) {
+    public String getMaDV() { return maDV; }
+    public void setMaDV(String maDV) { this.maDV = maDV; }
+    public String getMaPhien() { return maPhien; }
+    public void setMaPhien(String maPhien) { this.maPhien = maPhien; }
+    public String getTenDV() { return tenDV; }
+    public void setTenDV(String tenDV) { this.tenDV = tenDV; }
+    public int getSoLuong() { return soLuong; }
+    public void setSoLuong(int soLuong) { 
         this.soLuong = soLuong;
-        this.thanhTien = this.soLuong * this.gia; // cập nhật lại thành tiền khi đổi số lượng
+        this.thanhTien = this.soLuong * this.gia;
     }
-
-    public double getGia() {
-        return gia;
-    }
-
-    public void setGia(double gia) {
+    public double getGia() { return gia; }
+    public void setGia(double gia) { 
         this.gia = gia;
-        this.thanhTien = this.soLuong * this.gia; // cập nhật lại thành tiền khi đổi giá
+        this.thanhTien = this.soLuong * this.gia;
     }
-
-    public double getThanhTien() {
-        return thanhTien;
-    }
-
-    public void setThanhTien(double thanhTien) {
-        this.thanhTien = thanhTien;
-    }
+    public double getThanhTien() { return thanhTien; }
+    public void setThanhTien(double thanhTien) { this.thanhTien = thanhTien; }
 
     @Override
     public String toString() {

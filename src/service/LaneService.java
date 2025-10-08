@@ -1,78 +1,98 @@
 package service;
 
+import service.ServiceEntityService;
 import models.Lane;
 import java.io.*;
+import java.time.LocalDateTime;
+import models.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class LaneService {
-    private static final String FILE_PATH = "C://quan-ly-phong-choi-bowling//data//src//lane.txt";
+    private static final String FILE_NAME = "C://dev//quan-ly-phong-choi-bowling//data//src//lane.txt";
+    private List<Lane> lanes = new ArrayList<>();
+
+    public LaneService() {
+        loadFromFile();
+    }
+
+    @SuppressWarnings("unchecked")
+    public void loadFromFile() {
+        lanes.clear();
+        File file = new File(FILE_NAME);
+        if (!file.exists()) {
+            System.out.println("File " + FILE_NAME + " không tồn tại. Tạo danh sách trống.");
+            return;
+        }
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE_NAME))) {
+            lanes = (List<Lane>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Lỗi khi đọc file: " + e.getMessage());
+        }
+    }
+
+    public void saveToFile() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
+            oos.writeObject(lanes);
+        } catch (IOException e) {
+            System.out.println("Lỗi khi ghi file: " + e.getMessage());
+        }
+    }
 
     public void saveLane(Lane lane) {
-        List<Lane> lanes = readLanes();
         lanes.add(lane);
-        writeLanesToFile(lanes);
+        saveToFile();
     }
 
     public void updateLane(String maLane, Lane updatedLane) {
-        List<Lane> lanes = readLanes();
         for (int i = 0; i < lanes.size(); i++) {
             if (lanes.get(i).getMaLane().equals(maLane)) {
                 lanes.set(i, updatedLane);
-                break;
+                saveToFile();
+                return;
             }
         }
-        writeLanesToFile(lanes);
+        System.out.println("Không tìm thấy lane!");
     }
 
-    public void deleteLane(String maLane) {
-        List<Lane> lanes = readLanes();
-        lanes.removeIf(lane -> lane.getMaLane().equals(maLane));
-        writeLanesToFile(lanes);
+    public boolean deleteLane(String maLane) {
+        boolean removed = lanes.removeIf(lane -> lane.getMaLane().equals(maLane));
+        if (removed) saveToFile();
+        return removed;
     }
 
-    public List<Lane> findLanes(String searchTerm, String trangThai) {
-        List<Lane> lanes = readLanes();
-        List<Lane> result = new ArrayList<>();
+    public List<Lane> findLanes(String maOrTen, String trangThai) {
+        List<Lane> results = new ArrayList<>();
         for (Lane lane : lanes) {
-            boolean matchMaHoacTen = searchTerm == null || searchTerm.isEmpty() ||
-                    lane.getMaLane().equals(searchTerm) || lane.getTenLane().equalsIgnoreCase(searchTerm);
-            boolean matchTrangThai = trangThai == null || trangThai.isEmpty() || lane.getTrangThai().equalsIgnoreCase(trangThai);
-            if (matchMaHoacTen && matchTrangThai) {
-                result.add(lane);
+            boolean match = true;
+            if (maOrTen != null && !maOrTen.isEmpty()) {
+                match &= lane.getMaLane().contains(maOrTen) || lane.getTenLane().toLowerCase().contains(maOrTen.toLowerCase());
             }
+            if (trangThai != null && !trangThai.isEmpty()) {
+                match &= lane.getTrangThai().equalsIgnoreCase(trangThai);
+            }
+            if (match) results.add(lane);
         }
-        return result;
+        return results;
     }
 
     public List<Lane> getAllLanes() {
-        return readLanes();
+        return new ArrayList<>(lanes);
     }
 
-    private List<Lane> readLanes() {
-        List<Lane> lanes = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length == 5) {
-                    lanes.add(new Lane(data[0], data[1], data[2], Double.parseDouble(data[3]), data[4]));
-                }
+    public void updateLaneStatusFromSessions(List<GameSession> sessions) {
+        for (Lane lane : lanes) {
+            boolean isOccupied = sessions.stream()
+                    .anyMatch(session -> session.getMaLane().equals(lane.getMaLane()) &&
+                            LocalDateTime.now().isAfter(session.getThoiGianBatDau()) &&
+                            LocalDateTime.now().isBefore(session.getThoiGianKetThuc()));
+            if (isOccupied && !lane.getTrangThai().equals("đang chơi")) {
+                lane.setTrangThai("đang chơi");
+                updateLane(lane.getMaLane(), lane);
+            } else if (!isOccupied && lane.getTrangThai().equals("đang chơi")) {
+                lane.setTrangThai("trống");
+                updateLane(lane.getMaLane(), lane);
             }
-        } catch (IOException e) {
-            System.out.printf("File không tồn tại hoặc lỗi: " + e.getMessage());
-        }
-        return lanes;
-    }
-
-    private void writeLanesToFile(List<Lane> lanes) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH))) {
-            for (Lane lane : lanes) {
-                writer.write(lane.toString());
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            System.out.println("Lỗi khi lưu file: " + e.getMessage());
         }
     }
 }

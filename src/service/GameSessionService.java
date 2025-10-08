@@ -1,47 +1,43 @@
 package service;
 
 import models.GameSession;
-import java.time.*;
-import java.nio.file.*;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 
 public class GameSessionService {
     private final Path path;
     private final List<GameSession> data = new ArrayList<>();
-    private final java.util.function.Function<String, Double> lanePriceById;
+    private final Function<String, Double> lanePriceById;
 
-    public GameSessionService(Path path,
-                              java.util.function.Function<String, Double> lanePriceById) {
+    public GameSessionService(Path path, Function<String, Double> lanePriceById) {
         this.path = path;
         this.lanePriceById = lanePriceById;
-        reload(); // Load dữ liệu từ file khi khởi tạo
+        reload();
     }
 
-    /** Lấy toàn bộ danh sách phiên chơi */
     public List<GameSession> list() {
         return new ArrayList<>(data);
     }
 
-    /** Lấy phiên chơi theo mã */
     public Optional<GameSession> get(String id) {
         return data.stream()
                 .filter(x -> Objects.equals(x.getMaPhien(), id))
                 .findFirst();
     }
 
-    /** Tạo mới hoặc cập nhật phiên chơi */
     public void createOrUpdate(GameSession s) {
-        validate(s); // kiểm tra hợp lệ & trùng giờ
-        s.setTongTien(calcAmount(s)); // tính tiền tự động
+        validate(s);
+        s.setTongTien(calcAmount(s));
         get(s.getMaPhien()).ifPresentOrElse(
                 old -> data.set(data.indexOf(old), s),
                 () -> data.add(s)
         );
-        flush(); // ghi lại file
+        flush();
     }
 
-    /** Xóa phiên chơi theo mã */
     public boolean delete(String id) {
         Optional<GameSession> o = get(id);
         if (o.isEmpty()) return false;
@@ -50,7 +46,6 @@ public class GameSessionService {
         return true;
     }
 
-    /** Kiểm tra tính hợp lệ của phiên chơi */
     private void validate(GameSession s) {
         if (s.getMaPhien() == null || s.getMaPhien().isBlank())
             throw new IllegalArgumentException("Mã phiên rỗng");
@@ -59,81 +54,63 @@ public class GameSessionService {
                 !s.getThoiGianKetThuc().isAfter(s.getThoiGianBatDau()))
             throw new IllegalArgumentException("Thời gian không hợp lệ");
 
-        // Kiểm tra trùng giờ cùng lane
         for (GameSession g : data) {
             if (g.getMaPhien().equals(s.getMaPhien())) continue;
             if (!Objects.equals(g.getMaLane(), s.getMaLane())) continue;
 
-            boolean overlap = !s.getThoiGianKetThuc().isBefore(g.getThoiGianBatDau())
-                    && !s.getThoiGianBatDau().isAfter(g.getThoiGianKetThuc());
-            if (overlap)
-                throw new IllegalArgumentException("Lane trùng giờ");
+            boolean overlap = !s.getThoiGianKetThuc().isBefore(g.getThoiGianBatDau()) &&
+                    !s.getThoiGianBatDau().isAfter(g.getThoiGianKetThuc());
+            if (overlap) throw new IllegalArgumentException("Lane trùng giờ");
         }
     }
 
-    /** Tính tổng tiền dựa vào thời gian và giá lane */
     private double calcAmount(GameSession s) {
         double gia = lanePriceById.apply(s.getMaLane());
-        double hours = Duration.between(s.getThoiGianBatDau(), s.getThoiGianKetThuc()).toMinutes() / 60.0;
+        double hours = java.time.Duration.between(s.getThoiGianBatDau(), s.getThoiGianKetThuc()).toMinutes() / 60.0;
         return Math.round(hours * gia * 100.0) / 100.0;
     }
 
-
-    //  TÌM DANH SÁCH LANE TRỐNG TRONG KHOẢNG THỜI GIAN
-    public List<String> findAvailableLanes(List<String> allLaneIds,
-                                           LocalDateTime start,
-                                           LocalDateTime end) {
+    public List<String> findAvailableLanes(List<String> allLaneIds, LocalDateTime start, LocalDateTime end) {
         List<String> available = new ArrayList<>();
-
         for (String laneId : allLaneIds) {
             boolean isBusy = data.stream().anyMatch(session ->
-                    session.getMaLane().equalsIgnoreCase(laneId)
-                            && !(end.isBefore(session.getThoiGianBatDau())
-                            || start.isAfter(session.getThoiGianKetThuc()))
+                    session.getMaLane().equalsIgnoreCase(laneId) &&
+                            !(end.isBefore(session.getThoiGianBatDau()) ||
+                                    start.isAfter(session.getThoiGianKetThuc()))
             );
-
-            if (!isBusy) {
-                available.add(laneId); // nếu không trùng giờ, thêm vào danh sách lane trống
-            }
+            if (!isBusy) available.add(laneId);
         }
         return available;
     }
 
+    public List<GameSession> searchByCriteria(String searchTerm) {
+        return data.stream()
+                .filter(s -> s.getMaPhien().contains(searchTerm) ||
+                        s.getMaKH().contains(searchTerm) ||
+                        s.getMaLane().contains(searchTerm))
+                .toList();
+    }
 
+    @SuppressWarnings("unchecked")
     private void reload() {
         data.clear();
-        for (String s : readAll(path))
-            if (!s.isBlank())
-                data.add(GameSession.parse(s));
-    }
-
-    private void flush() {
-        List<String> lines = new ArrayList<>();
-        for (GameSession l : data)
-            lines.add(l.serialize());
-        writeAll(path, lines);
-    }
-
-    private static List<String> readAll(Path p) {
-        try {
-            if (!Files.exists(p)) {
-                Files.createDirectories(p.getParent());
-                Files.createFile(p);
-            }
-            return Files.readAllLines(p);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        File file = new File(path.toString());
+        if (!file.exists()) {
+            System.out.println("File dữ liệu không tồn tại, khởi tạo danh sách trống.");
+            return;
+        }
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path.toString()))) {
+            data.addAll((List<GameSession>) ois.readObject());
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Lỗi khi đọc file: " + e.getMessage());
         }
     }
 
-    private static void writeAll(Path p, List<String> lines) {
-        try {
-            Files.createDirectories(p.getParent());
-            Files.write(p, lines,
-                    StandardOpenOption.TRUNCATE_EXISTING,
-                    StandardOpenOption.CREATE);
+    private void flush() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path.toString()))) {
+            oos.writeObject(data);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Lỗi khi ghi file: " + e.getMessage());
         }
     }
 }

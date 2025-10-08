@@ -1,115 +1,58 @@
 package service;
 
 import models.ServiceEntity;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.file.Files;
 public class ServiceEntityService {
-    private Path filePath; // file path
+    private Path filePath;
     private List<ServiceEntity> services = new ArrayList<>();
 
-    // Constructor with file path parameter
     public ServiceEntityService(String filePathStr) {
         this.filePath = Paths.get(filePathStr);
     }
 
+    @SuppressWarnings("unchecked")
     public void loadFromFile() {
-        services.clear(); // clear old data
-
-        try (BufferedReader reader = Files.newBufferedReader(filePath)) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-
-                String[] parts = line.split(",");
-                if (parts.length == 5) {
-                    String maDV = parts[0].trim();
-                    String maPhien = parts[1].trim();
-                    String tenDV = parts[2].trim();
-                    int soLuong = Integer.parseInt(parts[3].trim());
-                    double gia = Double.parseDouble(parts[4].trim());
-
-                    ServiceEntity service = new ServiceEntity(maDV, maPhien, tenDV, soLuong, gia);
-                    services.add(service);
-                } else {
-                    System.out.println("Invalid format line: " + line);
-                }
-            }
-        } catch (IOException e) {
+        services.clear();
+        File file = new File(filePath.toString());
+        if (!file.exists()) {
+            System.out.println("File dữ liệu không tồn tại, khởi tạo danh sách trống.");
+            return;
+        }
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath.toString()))) {
+            services = (List<ServiceEntity>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
             System.out.println("Error reading file: " + e.getMessage());
         }
     }
 
-    public List<ServiceEntity> getAll() {
-        return services;
-    }
-
     public void saveToFile() {
-        try (BufferedWriter writer = Files.newBufferedWriter(filePath)) {
-            for (ServiceEntity s : services) {
-                // save as: maDV,maPhien,tenDV,soLuong,gia
-                String line = String.format("%s,%s,%s,%d,%.2f",
-                        s.getMaDV(), s.getMaPhien(), s.getTenDV(),
-                        s.getSoLuong(), s.getGia());
-                writer.write(line);
-                writer.newLine();
-            }
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath.toString()))) {
+            oos.writeObject(services);
             System.out.println("Data saved to file: " + filePath);
         } catch (IOException e) {
             System.out.println("Error writing file: " + e.getMessage());
         }
     }
 
-    public void add(ServiceEntity s) {
-        if (s != null) {
-            services.add(s);
-            System.out.println("Service added: " + s.getTenDV());
-            saveToFile();
-        } else {
-            System.out.println("Invalid service!");
-        }
+    public void add(ServiceEntity service) {
+        services.add(service);
+        saveToFile();
+        System.out.println("Thêm dịch vụ thành công!");
     }
 
-    public void update(String ma, ServiceEntity newS) {
-        if (ma == null || newS == null) {
-            System.out.println("Invalid parameters!");
-            return;
-        }
-
-        boolean found = false;
-        for (int i = 0; i < services.size(); i++) {
-            ServiceEntity s = services.get(i);
-            if (s.getMaDV().equals(ma)) {
-                s.setMaPhien(newS.getMaPhien());
-                s.setTenDV(newS.getTenDV());
-                s.setSoLuong(newS.getSoLuong());
-                s.setGia(newS.getGia());
-                found = true;
-                System.out.println("Service updated with ID " + ma);
-                saveToFile();
-                break;
-            }
-        }
-
-        if (!found) {
-            System.out.println("Service with ID " + ma + " not found");
-        }
-    }
-
-    public void delete(String ma) {
-        boolean removed = services.removeIf(s -> s.getMaDV().equals(ma));
-        if (removed) {
-            System.out.println("Service deleted with ID " + ma);
+    public boolean delete(String ma) {
+        ServiceEntity service = find(ma);
+        if (service != null) {
+            services.remove(service);
             saveToFile();
-        } else {
-            System.out.println("Service with ID " + ma + " not found");
+            return true;
         }
+        return false;
     }
 
     public ServiceEntity find(String ma) {
@@ -120,6 +63,17 @@ public class ServiceEntityService {
             }
         }
         return null;
+    }
+
+    public List<ServiceEntity> findAll() {
+        return new ArrayList<>(services);
+    }
+
+    public List<ServiceEntity> searchByCriteria(String searchTerm) {
+        return services.stream()
+                .filter(s -> s.getTenDV().toLowerCase().contains(searchTerm.toLowerCase()) ||
+                        s.getMaPhien().contains(searchTerm))
+                .toList();
     }
 
     public void printAll() {
@@ -175,5 +129,3 @@ public class ServiceEntityService {
         }
     }
 }
-
-
