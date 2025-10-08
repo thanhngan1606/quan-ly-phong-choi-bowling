@@ -71,7 +71,7 @@ public class CustomerService {
         customers.removeIf(c -> c.getMaKH().equals(ma));
         saveToFile();
     }
-    public Customer find(String ma) {
+    public Customer findById(String ma) {
         for (Customer c : customers) {
             if (c.getMaKH().equals(ma)) {
                 return c;
@@ -79,6 +79,16 @@ public class CustomerService {
         }
         return null;
     }
+    public Customer findByName(String ten) {
+    List<Customer> result = new ArrayList<>();
+    for (Customer c : customers) {
+        if (c.getTen().toLowerCase().contains(ten.toLowerCase())) {
+            result.add(c);
+        }
+    }
+    return result;
+}
+
     public void printAll() {
         for (Customer c : customers) {
             System.out.println(c);
