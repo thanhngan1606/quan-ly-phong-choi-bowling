@@ -1,9 +1,7 @@
+import java.time.LocalDateTime;
+import java.util.*;
 import models.*;
 import service.*;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.*;
-import java.util.Scanner;
 
 public class Main {
     private static LaneService laneService = new LaneService();
@@ -98,8 +96,14 @@ public class Main {
     private static void themLaneMoi() {
         System.out.print("Nhập mã lane: ");
         String maLane = scanner.nextLine().trim();
-        if (maLane.isEmpty()) {
+        if( laneService.findLanes(maLane, null).stream().anyMatch(l -> l.getMaLane().equals(maLane))) {
+            System.out.println("Lỗi: Mã lane đã tồn tại. Vui lòng nhập mã khác.");
+            return;
+        } else if (maLane.isEmpty()) {
             System.out.println("Lỗi: Mã lane không được để trống.");
+            return;
+        } else if (!maLane.matches("L\\d{3}")) {
+            System.out.println("Lỗi: Mã lane phải có định dạng Lxxx (x là chữ số).");
             return;
         }
 
@@ -243,9 +247,10 @@ public class Main {
     private static void themKhachHangMoi() {
         System.out.print("Nhập mã KH: ");
         String maKH = scanner.nextLine().trim();
-        if (maKH.isEmpty()) {
-            System.out.println("Lỗi: Mã KH không được để trống.");
-            return;
+        while (customerService.find(maKH) != null) {
+            System.out.println("Lỗi: Mã KH đã tồn tại. Vui lòng nhập mã khác.");
+            System.out.print("Nhập mã KH: ");
+            maKH = scanner.nextLine().trim();
         }
 
         System.out.print("Nhập tên KH: ");
