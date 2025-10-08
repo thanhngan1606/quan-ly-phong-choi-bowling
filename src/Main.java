@@ -1,152 +1,160 @@
+
 import models.GameSession;
 import service.GameSessionService;
 import java.time.LocalDateTime;
 import java.util.*;
+import models.Lane;
+import service.LaneService;
+import java.util.List;
+
 import java.util.Scanner;
 import java.nio.file.Path;
 
 public class Main {
-    private static GameSessionService sessionService;
-
-    public static void main(String[] args) throws Exception {
+   
+        // Khởi tạo service với file dữ liệu
+ 
         Scanner sc = new Scanner(System.in);
-        sessionService = new GameSessionService(
-                Path.of("data/src/gamesession.txt"),
-                id -> 200000.0
-        );
-        menuPhien(sc);
-    }
+        int choice;
+    private static LaneService laneService = new LaneService();
+    private static Scanner scanner = new Scanner(System.in);
 
-    // ===== PHIÊN CHƠI =====
-    private static void menuPhien(Scanner sc) throws Exception {
+
+    public static void main(String[] args) {
         while (true) {
-            System.out.println("\n--- PHIÊN CHƠI ---");
-            System.out.println("1. Thêm phiên chơi");
-            System.out.println("2. Sửa phiên chơi");
-            System.out.println("3. Xóa phiên chơi");
-            System.out.println("4. Tìm phiên chơi (mã/khách/lane)");
-            System.out.println("5. Danh sách phiên chơi");
-            System.out.println("0. Quay lại");
-            System.out.print("Chọn: ");
-            String c = sc.nextLine();
+            System.out.println("=== QUẢN LÝ ĐƯỜNG BOWLING ===");
+            System.out.println("1. Thêm lane mới");
+            System.out.println("2. Sửa lane");
+            System.out.println("3. Xóa lane");
+            System.out.println("4. Tìm kiếm lane (theo mã, tên, hoặc trạng thái)");
+            System.out.println("5. Hiển thị tất cả lane");
+            System.out.println("6. Quản lý trạng thái lane");
+            System.out.println("0. Thoát");
+            System.out.print("Chọn chức năng: ");
 
-            if (c.equals("0")) break;
-            List<GameSession> ds = sessionService.list();
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Xóa bộ đệm
 
-            switch (c) {
-                case "1" -> {
-                    try {
-                        GameSession s = nhapPhien(sc);
-                        sessionService.createOrUpdate(s);
-                        System.out.println("✅ Đã thêm phiên chơi thành công!");
-                    } catch (Exception ex) {
-                        System.out.println("⛔ " + ex.getMessage());
-                    }
-                }
-
-                case "2" -> {
-                    System.out.print("Mã phiên cần sửa: ");
-                    String ma = sc.nextLine();
-                    Optional<GameSession> o = sessionService.get(ma);
-                    if (o.isEmpty()) {
-                        System.out.println("⛔ Không tìm thấy phiên chơi!");
-                        break;
-                    }
-                    try {
-                        GameSession s = nhapPhienSua(sc, o.get());
-                        sessionService.createOrUpdate(s);
-                        System.out.println("✅ Đã cập nhật phiên chơi thành công!");
-                    } catch (Exception ex) {
-                        System.out.println("⛔ " + ex.getMessage());
-                    }
-                }
-
-                case "3" -> {
-                    System.out.print("Mã: ");
-                    String ma = sc.nextLine();
-                    if (!sessionService.delete(ma))
-                        System.out.println("Không tìm thấy phiên chơi!");
-                    else
-                        System.out.println("Đã xóa phiên chơi thành công!");
-                }
-
-                case "4" -> {
-                    System.out.print("Từ khóa: ");
-                    String k = sc.nextLine().toLowerCase();
-                    ds.stream().filter(x ->
-                                    x.getMaPhien().toLowerCase().contains(k)
-                                            || x.getMaKH().toLowerCase().contains(k)
-                                            || x.getMaLane().toLowerCase().contains(k))
-                            .forEach(Main::inPhien);
-                }
-
-                case "5" -> ds.forEach(Main::inPhien);
-                default -> System.out.println("Sai lựa chọn!");
+            switch (choice) {
+                case 1:
+                    themLaneMoi();
+                    break;
+                case 2:
+                    suaLane();
+                    break;
+                case 3:
+                    xoaLane();
+                    break;
+                case 4:
+                    timKiemLane();
+                    break;
+                case 5:
+                    hienThiTatCaLane();
+                    break;
+                case 6:
+                    quanLyTrangThai();
+                    break;
+                case 0:
+                    System.out.println("Thoát chương trình.");
+                    return;
+                default:
+                    System.out.println("Lựa chọn không hợp lệ!");
             }
         }
     }
 
-    // ===== HÀM NHẬP PHIÊN MỚI =====
-    private static GameSession nhapPhien(Scanner sc) {
-        System.out.print("Mã phiên: ");
-        String ma = sc.nextLine().trim();
-        System.out.print("Mã KH: ");
-        String maKh = sc.nextLine().trim();
+    private static void themLaneMoi() {
+        System.out.print("Nhập mã lane: ");
+        String maLane = scanner.nextLine();
+        System.out.print("Nhập tên lane: ");
+        String tenLane = scanner.nextLine();
+        System.out.print("Nhập trạng thái (trống/đang chơi/bảo trì): ");
+        String trangThai = scanner.nextLine();
+        System.out.print("Nhập giá/giờ: ");
+        double giaGio = scanner.nextDouble();
+        scanner.nextLine(); // Xóa bộ đệm
+        System.out.print("Nhập thông tin bảo trì: ");
+        String baoTri = scanner.nextLine();
 
-        System.out.print("Bắt đầu (yyyy-MM-dd HH:mm): ");
-        LocalDateTime bd = LocalDateTime.parse(sc.nextLine().trim(), GameSession.F);
-        System.out.print("Kết thúc (yyyy-MM-dd HH:mm): ");
-        LocalDateTime kt = LocalDateTime.parse(sc.nextLine().trim(), GameSession.F);
+        Lane lane = new Lane(maLane, tenLane, trangThai, giaGio, baoTri);
+        laneService.saveLane(lane);
+        System.out.println("Thêm lane thành công!");
+    }
 
-        System.out.print("Xem danh sách lane trống? (y/n): ");
-        if (sc.nextLine().equalsIgnoreCase("y")) {
-            List<String> allLanes = List.of("L1", "L2", "L3", "L4");
-            List<String> lanesTrong = sessionService.findAvailableLanes(allLanes, bd, kt);
-            if (lanesTrong.isEmpty())
-                System.out.println("⛔ Không có lane trống trong thời gian này!");
-            else
-                System.out.println("✅ Lane trống: " + String.join(", ", lanesTrong));
+    private static void suaLane() {
+        System.out.print("Nhập mã lane cần sửa: ");
+        String maLane = scanner.nextLine();
+        Lane existingLane = laneService.findLanes(maLane, null).get(0); // Lấy lane đầu tiên khớp
+        if (existingLane == null) {
+            System.out.println("Không tìm thấy lane!");
+            return;
         }
 
-        System.out.print("Mã lane muốn đặt: ");
-        String maLane = sc.nextLine().trim();
+        System.out.print("Nhập tên mới (hoặc Enter để giữ nguyên): ");
+        String tenLane = scanner.nextLine().isEmpty() ? existingLane.getTenLane() : scanner.nextLine();
+        System.out.print("Nhập trạng thái mới (hoặc Enter để giữ nguyên): ");
+        String trangThai = scanner.nextLine().isEmpty() ? existingLane.getTrangThai() : scanner.nextLine();
+        System.out.print("Nhập giá/giờ mới (hoặc Enter để giữ nguyên): ");
+        double giaGio = scanner.nextLine().isEmpty() ? existingLane.getGiaGio() : scanner.nextDouble();
+        scanner.nextLine(); // Xóa bộ đệm
+        System.out.print("Nhập thông tin bảo trì mới (hoặc Enter để giữ nguyên): ");
+        String baoTri = scanner.nextLine().isEmpty() ? existingLane.getBaoTri() : scanner.nextLine();
 
-        return new GameSession(ma, maKh, maLane, bd, kt, 0.0);
+        Lane updatedLane = new Lane(maLane, tenLane, trangThai, giaGio, baoTri);
+        laneService.updateLane(maLane, updatedLane);
+        System.out.println("Sửa lane thành công!");
     }
 
-    // ===== 🆕 HÀM NHẬP PHIÊN SỬA (ENTER GIỮ NGUYÊN) =====
-    private static GameSession nhapPhienSua(Scanner sc, GameSession old) {
-        System.out.println("Giữ nguyên thông tin cũ bằng cách nhấn Enter ↓");
-
-        System.out.printf("Mã KH (%s): ", old.getMaKH());
-        String maKh = sc.nextLine().trim();
-        if (maKh.isBlank()) maKh = old.getMaKH();
-
-        System.out.printf("Mã lane (%s): ", old.getMaLane());
-        String maLane = sc.nextLine().trim();
-        if (maLane.isBlank()) maLane = old.getMaLane();
-
-        System.out.printf("Bắt đầu (%s): ", GameSession.F.format(old.getThoiGianBatDau()));
-        String bdStr = sc.nextLine().trim();
-        LocalDateTime bd = bdStr.isBlank()
-                ? old.getThoiGianBatDau()
-                : LocalDateTime.parse(bdStr, GameSession.F);
-
-        System.out.printf("Kết thúc (%s): ", GameSession.F.format(old.getThoiGianKetThuc()));
-        String ktStr = sc.nextLine().trim();
-        LocalDateTime kt = ktStr.isBlank()
-                ? old.getThoiGianKetThuc()
-                : LocalDateTime.parse(ktStr, GameSession.F);
-
-        return new GameSession(old.getMaPhien(), maKh, maLane, bd, kt, old.getTongTien());
+    private static void xoaLane() {
+        System.out.print("Nhập mã lane cần xóa: ");
+        String maLane = scanner.nextLine();
+        laneService.deleteLane(maLane);
+        System.out.println("Xóa lane thành công!");
     }
 
-    // ===== HIỂN THỊ =====
-    private static void inPhien(GameSession s) {
-        System.out.printf("%s | KH:%s | L:%s | %s -> %s | %.2f\n",
-                s.getMaPhien(), s.getMaKH(), s.getMaLane(),
-                GameSession.F.format(s.getThoiGianBatDau()),
-                GameSession.F.format(s.getThoiGianKetThuc()),
-                s.getTongTien());
+    private static void timKiemLane() {
+        System.out.print("Nhập mã hoặc tên lane để tìm kiếm (hoặc Enter để bỏ qua): ");
+        String searchTerm = scanner.nextLine();
+        System.out.print("Nhập trạng thái (trống/đang chơi/bảo trì, hoặc Enter để bỏ qua): ");
+        String trangThai = scanner.nextLine();
+
+        List<Lane> lanes = laneService.findLanes(searchTerm, trangThai);
+        if (lanes.isEmpty()) {
+            System.out.println("Không tìm thấy lane nào!");
+        } else {
+            System.out.println("Kết quả tìm kiếm:");
+            for (Lane lane : lanes) {
+                System.out.println(lane);
+            }
+        }
+    }
+
+    private static void hienThiTatCaLane() {
+        List<Lane> lanes = laneService.getAllLanes();
+        if (lanes.isEmpty()) {
+            System.out.println("Không có lane nào!");
+        } else {
+            System.out.println("Danh sách lane:");
+            for (Lane lane : lanes) {
+                System.out.println(lane);
+            }
+        }
+    }
+
+    private static void quanLyTrangThai() {
+        System.out.print("Nhập mã lane để quản lý trạng thái: ");
+        String maLane = scanner.nextLine();
+        Lane lane = laneService.findLanes(maLane, null).get(0); // Lấy lane đầu tiên khớp
+        if (lane == null) {
+            System.out.println("Không tìm thấy lane!");
+            return;
+        }
+
+        System.out.println("Trạng thái hiện tại: " + lane.getTrangThai());
+        System.out.print("Nhập trạng thái mới (trống/đang chơi/bảo trì): ");
+        String newTrangThai = scanner.nextLine();
+        lane.setTrangThai(newTrangThai);
+        laneService.updateLane(maLane, lane);
+        System.out.println("Cập nhật trạng thái thành công!");
     }
 }
