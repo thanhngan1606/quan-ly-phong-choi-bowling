@@ -2,8 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+<<<<<<< HEAD
       <module fileurl="file://$PROJECT_DIR$/bowlingpro.iml" filepath="$PROJECT_DIR$/bowlingpro.iml" />
       <module fileurl="file://$PROJECT_DIR$/data/data.iml" filepath="$PROJECT_DIR$/data/data.iml" />
+=======
+      <module fileurl="file://$PROJECT_DIR$/untitled1.iml" filepath="$PROJECT_DIR$/untitled1.iml" />
+>>>>>>> feature/shoes
     </modules>
   </component>
 </project>
