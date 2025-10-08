@@ -45,6 +45,11 @@ public class ServiceEntityService {
             System.out.println("Error reading file: " + e.getMessage());
         }
     }
+
+    public List<ServiceEntity> getAll() {
+        return services;
+    }
+
     public void saveToFile() {
         try (BufferedWriter writer = Files.newBufferedWriter(filePath)) {
             for (ServiceEntity s : services) {
@@ -68,6 +73,17 @@ public class ServiceEntityService {
             saveToFile();
         } else {
             System.out.println("Invalid service!");
+        }
+    }
+
+
+    public void delete(String ma) {
+        boolean removed = services.removeIf(s -> s.getMaDV().equals(ma));
+        if (removed) {
+            System.out.println("Service deleted with ID " + ma);
+            saveToFile();
+        } else {
+            System.out.println("Service with ID " + ma + " not found");
         }
     }
 
