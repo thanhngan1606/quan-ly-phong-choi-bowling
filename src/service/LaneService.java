@@ -1,24 +1,55 @@
 package service;
 
 import models.Lane;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 
 public class LaneService {
     private static final String FILE_PATH = "C://quan-ly-phong-choi-bowling//data//src//lane.txt";
 
-    public void saveLane(Lane lane){
+    public void saveLane(Lane lane) {
         List<Lane> lanes = readLanes();
         lanes.add(lane);
         writeLanesToFile(lanes);
     }
 
-    private List<Lane> readLanes(){
+    public void updateLane(String maLane, Lane updatedLane) {
+        List<Lane> lanes = readLanes();
+        for (int i = 0; i < lanes.size(); i++) {
+            if (lanes.get(i).getMaLane().equals(maLane)) {
+                lanes.set(i, updatedLane);
+                break;
+            }
+        }
+        writeLanesToFile(lanes);
+    }
+
+    public void deleteLane(String maLane) {
+        List<Lane> lanes = readLanes();
+        lanes.removeIf(lane -> lane.getMaLane().equals(maLane));
+        writeLanesToFile(lanes);
+    }
+
+    public List<Lane> findLanes(String searchTerm, String trangThai) {
+        List<Lane> lanes = readLanes();
+        List<Lane> result = new ArrayList<>();
+        for (Lane lane : lanes) {
+            boolean matchMaHoacTen = searchTerm == null || searchTerm.isEmpty() ||
+                    lane.getMaLane().equals(searchTerm) || lane.getTenLane().equalsIgnoreCase(searchTerm);
+            boolean matchTrangThai = trangThai == null || trangThai.isEmpty() || lane.getTrangThai().equalsIgnoreCase(trangThai);
+            if (matchMaHoacTen && matchTrangThai) {
+                result.add(lane);
+            }
+        }
+        return result;
+    }
+
+    public List<Lane> getAllLanes() {
+        return readLanes();
+    }
+
+    private List<Lane> readLanes() {
         List<Lane> lanes = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
             String line;
@@ -29,7 +60,7 @@ public class LaneService {
                 }
             }
         } catch (IOException e) {
-            System.out.printf("File không tồn tại hoặc lỗi"+e.getMessage());
+            System.out.printf("File không tồn tại hoặc lỗi: " + e.getMessage());
         }
         return lanes;
     }
@@ -43,91 +74,5 @@ public class LaneService {
         } catch (IOException e) {
             System.out.println("Lỗi khi lưu file: " + e.getMessage());
         }
-    }
-
-=======
-    // Load từ file TXT
-    public void loadFromFile(String filePath) throws IOException {
-        lanes.clear();
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while((line = br.readLine()) != null) {
-                String[] parts = line.split("\\|");
-                if (parts.length == 5) {
-                    Lane l = new Lane(
-                            parts[0].trim(),                    // mã
-                            parts[1].trim(),                    // tên
-                            parts[2].trim(),                    // trạng thái
-                            Double.parseDouble(parts[3].trim()),// giá
-                            parts[4].trim()                     // bảo trì
-                    );
-                    lanes.add(l);
-                }
-            }
-        }
-    }
-
-
-    // Ghi ra file TXT
-    public void saveToFile(String filePath) throws IOException {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
-            for (Lane l : lanes) {
-                bw.write(l.toString());
-                bw.newLine();
-            }
-        }
-    }
-
-    // Thêm lane
-    public void addLane(Lane lane) {
-        lanes.add(lane);
-    }
-
-    // Cập nhật lane
-    public boolean updateLane(String maLane, Lane updatedLane) {
-        Optional<Lane> existing = lanes.stream()
-                .filter(l -> l.getMaLane().equals(maLane))
-                .findFirst();
-        if (existing.isPresent()) {
-            Lane l = existing.get();
-            l.setTen(updatedLane.getTen());
-            l.setTrangThai(updatedLane.getTrangThai());
-            l.setGia(updatedLane.getGia());
-            l.setBaoTri(updatedLane.getBaoTri());
-            return true;
-        }
-        return false;
-    }
-
-    // Xóa lane
-    public boolean deleteLane(String maLane) {
-        return lanes.removeIf(l -> l.getMaLane().equals(maLane));
-    }
-
-    // Tìm kiếm theo mã hoặc tên
-    public List<Lane> searchLane(String keyword) {
-        return lanes.stream()
-                .filter(l -> l.getMaLane().equalsIgnoreCase(keyword)
-                        || l.getTen().equalsIgnoreCase(keyword))
-                .collect(Collectors.toList());
-    }
-
-    // Lọc theo trạng thái
-    public List<Lane> filterByTrangThai(String trangThai) {
-        return lanes.stream()
-                .filter(l -> l.getTrangThai().equalsIgnoreCase(trangThai))
-                .collect(Collectors.toList());
-    }
-    public List<Lane> search(String keyword) {
-        return lanes.stream()
-                .filter(l -> l.getMaLane().equalsIgnoreCase(keyword)
-                        || l.getTen().equalsIgnoreCase(keyword)
-|| l.getTrangThai().equalsIgnoreCase(keyword))
-                .collect(Collectors.toList());
-    }
-
-    // Lấy tất cả lanes
-    public List<Lane> getAllLanes() {
-        return lanes;
     }
 }
