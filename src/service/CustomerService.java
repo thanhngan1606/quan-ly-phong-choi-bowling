@@ -3,33 +3,9 @@ import java.io.*;
 import java.util.*;
 import models.Customer;
 public class CustomerService {
-    private static Scanner scanner = new Scanner(System.in);
-    private static final String DATA_FILE = "customers.dat";
-    /**
-     * Hàm nhập liệu chung, lặp cho đến khi giá trị nhập vào hợp lệ theo logic xác thực.
-     * * @param prompt Lời nhắc hiển thị cho người dùng (ví dụ: "Nhập Tên: ")
-     * @param validator Logic xác thực cho trường dữ liệu này (ví dụ: (value) -> value.matches("[a-zA-Z\\s]+"))
-     * @param errorMessage Thông báo lỗi khi nhập sai
-     * @return Chuỗi dữ liệu đã được xác thực
-     */
-    // Lưu ý: Mình dùng Interface Functional (Lambda) cho Validator để code gọn nhất
-    interface Validator {
-        boolean validate(String value);
-    }
-
-    public static String nhapGiaTriHopLe(String prompt, Validator validator, String errorMessage) {
-        String input;
-        while (true) {
-            System.out.print(prompt);
-            input = scanner.nextLine().trim(); // Lấy đầu vào và loại bỏ khoảng trắng dư thừa
-
-            if (validator.validate(input)) {
-                return input; // Hợp lệ, trả về và thoát khỏi vòng lặp
-            } else {
-                System.out.println("Lỗi: " + errorMessage + " Vui lòng nhập lại.");
-            }
-        }
-    }
+    
+    private static final String DATA_FILE = "customers.txt";
+   
 
     private List<Customer> customers = new ArrayList<>();
     public CustomerService(){
