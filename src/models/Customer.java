@@ -1,6 +1,7 @@
 package models;
 
-public class Customer {
+
+    public class Customer {
     private String maKH;
     private String ten;
     private String sdt;
@@ -16,39 +17,39 @@ public class Customer {
         this.diemThuong = diemThuong;
     }
     public String getMaKH() {
-        return MaKH;
+        return maKH;
     }
-    public void setMaKH(String MaKH) {
-        this.MaKH = MaKH;
+    public void setMaKH(String maKH) {
+        this.maKH = maKH;
     }
     public String getTen() {
-        return Ten;
+        return ten;
     }
-    public void setTen(String Ten) {
-        this.Ten = Ten;
+    public void setTen(String ten) {
+        this.ten = ten;
     }
     public String getSdt() {
-        return Sdt;
+        return sdt;
     }
-    public void setSdt(String Sdt) {
-        this.Sdt = Sdt;
+    public void setSdt(String sdt) {
+        this.sdt = sdt;
     }
     public String getVip() {
-        return Vip;
+        return vip;
     }
-    public void setVip(String Vip) {
-        this.Vip = Vip;
+    public void setVip(String vip) {
+        this.vip = vip;
     }
     public int getDiemThuong() {
-        return DiemThuong;
+        return diemThuong;
     }
-    public void setDiemThuong(int DiemThuong) {
-        this.DiemThuong = DiemThuong;
+    public void setDiemThuong(int diemThuong) {
+        this.diemThuong = diemThuong;
     }
     @Override
     public String toString() {
         return String.format("Mã: %-10s | Tên: %-20s | SĐT: %-12s | VIP: %-5s | Điểm: %d",
-                MaKH, Ten, Sdt, Vip, DiemThuong);
+                maKH, ten, sdt, vip, diemThuong);
     }
-    // Getter / Setter ...
-}
+    
+    }
