@@ -45,8 +45,6 @@ public class LaneService {
         }
     }
 
-=======
-    // Load từ file TXT
     public void loadFromFile(String filePath) throws IOException {
         lanes.clear();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
