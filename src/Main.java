@@ -148,48 +148,52 @@ public class Main {
         System.out.println("Thêm lane thành công!");
     }
 
-    private static void suaLane() {
-        System.out.print("Nhập mã lane cần sửa: ");
-        String maLane = scanner.nextLine().trim();
-        List<Lane> lanes = laneService.findLanes(maLane, null);
-        if (lanes.isEmpty()) {
-            System.out.println("Không tìm thấy lane!");
-            return;
-        }
-        Lane existingLane = lanes.get(0);
-
-        System.out.print("Nhập tên mới (hoặc Enter để giữ nguyên): ");
-        String tenLane = scanner.nextLine().trim().isEmpty() ? existingLane.getTenLane() : scanner.nextLine().trim();
-        if (!tenLane.isEmpty() && tenLane.isEmpty()) {
-            System.out.println("Lỗi: Tên lane không được để trống.");
-            return;
-        }
-
-        System.out.print("Nhập giá mới (hoặc Enter để giữ nguyên): ");
-        double gia = scanner.nextLine().trim().isEmpty() ? existingLane.getGiaGio() : Double.parseDouble(scanner.nextLine().trim());
-        if (!scanner.nextLine().trim().isEmpty() && gia <= 0) {
-            System.out.println("Lỗi: Giá phải là số dương.");
-            return;
-        }
-
-        System.out.print("Nhập trạng thái mới (hoặc Enter để giữ nguyên): ");
-        String trangThai = scanner.nextLine().trim().isEmpty() ? existingLane.getTrangThai() : scanner.nextLine().trim().toLowerCase();
-        if (!trangThai.isEmpty() && (!trangThai.equals("trống") && !trangThai.equals("đang chơi") && !trangThai.equals("bảo trì"))) {
-            System.out.println("Lỗi: Trạng thái chỉ được là 'trống', 'đang chơi', hoặc 'bảo trì'.");
-            return;
-        }
-
-        System.out.print("Nhập thông tin bảo trì mới (hoặc Enter để giữ nguyên): ");
-        String baoTri = scanner.nextLine().trim().isEmpty() ? existingLane.getBaoTri() : scanner.nextLine().trim();
-        if (baoTri.isEmpty()) {
-            System.out.println("Lỗi: Thông tin bảo trì không được để trống.");
-            return;
-        }
-
-        Lane updatedLane = new Lane(maLane, tenLane, trangThai, gia, baoTri);
-        laneService.updateLane(maLane, updatedLane);
-        System.out.println("Sửa lane thành công!");
+  private static void suaLane() {
+    System.out.print("Nhập mã lane cần sửa: ");
+    String maLane = scanner.nextLine().trim();
+    List<Lane> lanes = laneService.findLanes(maLane, null);
+    if (lanes.isEmpty()) {
+        System.out.println("Không tìm thấy lane!");
+        return;
     }
+    Lane existingLane = lanes.get(0);
+
+    System.out.print("Nhập tên mới (hoặc Enter để giữ nguyên): ");
+    String tenLane = scanner.nextLine().trim();
+    tenLane = tenLane.isEmpty() ? existingLane.getTenLane() : tenLane;
+    if (tenLane.isEmpty()) {
+        System.out.println("Lỗi: Tên lane không được để trống.");
+        return;
+    }
+
+    System.out.print("Nhập giá mới (hoặc Enter để giữ nguyên): ");
+    String giaInput = scanner.nextLine().trim();
+    double gia = giaInput.isEmpty() ? existingLane.getGiaGio() : Double.parseDouble(giaInput);
+    if (!giaInput.isEmpty() && gia <= 0) {
+        System.out.println("Lỗi: Giá phải là số dương.");
+        return;
+    }
+
+    System.out.print("Nhập trạng thái mới (hoặc Enter để giữ nguyên): ");
+    String trangThai = scanner.nextLine().trim();
+    trangThai = trangThai.isEmpty() ? existingLane.getTrangThai() : trangThai.toLowerCase();
+    if (!trangThai.isEmpty() && (!trangThai.equals("trống") && !trangThai.equals("đang chơi") && !trangThai.equals("bảo trì"))) {
+        System.out.println("Lỗi: Trạng thái chỉ được là 'trống', 'đang chơi', hoặc 'bảo trì'.");
+        return;
+    }
+
+    System.out.print("Nhập thông tin bảo trì mới (hoặc Enter để giữ nguyên): ");
+    String baoTri = scanner.nextLine().trim();
+    baoTri = baoTri.isEmpty() ? existingLane.getBaoTri() : baoTri;
+    if (baoTri.isEmpty()) {
+        System.out.println("Lỗi: Thông tin bảo trì không được để trống.");
+        return;
+    }
+
+    Lane updatedLane = new Lane(maLane, tenLane, trangThai, gia, baoTri);
+    laneService.updateLane(maLane, updatedLane);
+    System.out.println("Sửa lane thành công!");
+}
 
     private static void xoaLane() {
         System.out.print("Nhập mã lane cần xóa: ");
@@ -309,43 +313,47 @@ public class Main {
         System.out.println("Thêm khách hàng thành công!");
     }
 
-    private static void suaKhachHang() {
-        System.out.print("Nhập mã KH cần sửa: ");
-        String maKH = scanner.nextLine().trim();
-        Customer existingCustomer = customerService.find(maKH);
-        if (existingCustomer == null) {
-            System.out.println("Không tìm thấy khách hàng!");
-            return;
-        }
-
-        System.out.print("Nhập tên mới (hoặc Enter để giữ nguyên): ");
-        String ten = scanner.nextLine().trim().isEmpty() ? existingCustomer.getTen() : scanner.nextLine().trim();
-        if (!ten.isEmpty() && ten.isEmpty()) {
-            System.out.println("Lỗi: Tên KH không được để trống.");
-            return;
-        }
-
-        System.out.print("Nhập SĐT mới (hoặc Enter để giữ nguyên): ");
-        String sdt = scanner.nextLine().trim().isEmpty() ? existingCustomer.getSdt() : scanner.nextLine().trim();
-        if (!sdt.isEmpty() && sdt.isEmpty()) {
-            System.out.println("Lỗi: SĐT không được để trống.");
-            return;
-        }
-
-        System.out.print("Nhập VIP mới (true/false, hoặc Enter để giữ nguyên): ");
-        boolean vip = scanner.nextLine().trim().isEmpty() ? existingCustomer.isVip() : Boolean.parseBoolean(scanner.nextLine().trim());
-
-        System.out.print("Nhập điểm thưởng mới (hoặc Enter để giữ nguyên): ");
-        int diemThuong = scanner.nextLine().trim().isEmpty() ? existingCustomer.getDiemThuong() : Integer.parseInt(scanner.nextLine().trim());
-        if (!scanner.nextLine().trim().isEmpty() && diemThuong < 0) {
-            System.out.println("Lỗi: Điểm thưởng phải không âm.");
-            return;
-        }
-
-        Customer updatedCustomer = new Customer(maKH, ten, sdt, vip, diemThuong);
-        customerService.update(maKH, updatedCustomer);
-        System.out.println("Sửa khách hàng thành công!");
+  private static void suaKhachHang() {
+    System.out.print("Nhập mã KH cần sửa: ");
+    String maKH = scanner.nextLine().trim();
+    Customer existingCustomer = customerService.find(maKH);
+    if (existingCustomer == null) {
+        System.out.println("Không tìm thấy khách hàng!");
+        return;
     }
+
+    System.out.print("Nhập tên mới (hoặc Enter để giữ nguyên): ");
+    String ten = scanner.nextLine().trim();
+    ten = ten.isEmpty() ? existingCustomer.getTen() : ten;
+    if (ten.isEmpty()) {
+        System.out.println("Lỗi: Tên KH không được để trống.");
+        return;
+    }
+
+    System.out.print("Nhập SĐT mới (hoặc Enter để giữ nguyên): ");
+    String sdt = scanner.nextLine().trim();
+    sdt = sdt.isEmpty() ? existingCustomer.getSdt() : sdt;
+    if (sdt.isEmpty()) {
+        System.out.println("Lỗi: SĐT không được để trống.");
+        return;
+    }
+
+    System.out.print("Nhập VIP mới (true/false, hoặc Enter để giữ nguyên): ");
+    String vipInput = scanner.nextLine().trim();
+    boolean vip = vipInput.isEmpty() ? existingCustomer.isVip() : Boolean.parseBoolean(vipInput);
+
+    System.out.print("Nhập điểm thưởng mới (hoặc Enter để giữ nguyên): ");
+    String diemThuongInput = scanner.nextLine().trim();
+    int diemThuong = diemThuongInput.isEmpty() ? existingCustomer.getDiemThuong() : Integer.parseInt(diemThuongInput);
+    if (!diemThuongInput.isEmpty() && diemThuong < 0) {
+        System.out.println("Lỗi: Điểm thưởng phải không âm.");
+        return;
+    }
+
+    Customer updatedCustomer = new Customer(maKH, ten, sdt, vip, diemThuong);
+    customerService.update(maKH, updatedCustomer);
+    System.out.println("Sửa khách hàng thành công!");
+}
 
     private static void xoaKhachHang() {
         System.out.print("Nhập mã KH cần xóa: ");
@@ -463,44 +471,46 @@ public class Main {
     }
 
     private static void suaPhienChoi() {
-        System.out.print("Nhập mã phiên cần sửa: ");
-        String maPhien = scanner.nextLine().trim();
-        GameSession existingSession = gameSessionService.get(maPhien).orElse(null);
-        if (existingSession == null) {
-            System.out.println("Không tìm thấy phiên chơi!");
-            return;
-        }
-
-        System.out.print("Nhập mã KH mới (hoặc Enter để giữ nguyên): ");
-        String maKH = scanner.nextLine().trim().isEmpty() ? existingSession.getMaKH() : scanner.nextLine().trim();
-        if (!maKH.isEmpty() && maKH.isEmpty()) {
-            System.out.println("Lỗi: Mã KH không được để trống.");
-            return;
-        }
-
-        System.out.print("Nhập mã lane mới (hoặc Enter để giữ nguyên): ");
-        String maLane = scanner.nextLine().trim().isEmpty() ? existingSession.getMaLane() : scanner.nextLine().trim();
-        if (!maLane.isEmpty() && maLane.isEmpty()) {
-            System.out.println("Lỗi: Mã lane không được để trống.");
-            return;
-        }
-
-        System.out.print("Nhập giờ bắt đầu mới (hoặc Enter để giữ nguyên, yyyy-MM-dd HH:mm): ");
-        LocalDateTime batDau = scanner.nextLine().trim().isEmpty() ? existingSession.getThoiGianBatDau() :
-                LocalDateTime.parse(scanner.nextLine().trim(), GameSession.F);
-
-        System.out.print("Nhập giờ kết thúc mới (hoặc Enter để giữ nguyên, yyyy-MM-dd HH:mm): ");
-        LocalDateTime ketThuc = scanner.nextLine().trim().isEmpty() ? existingSession.getThoiGianKetThuc() :
-                LocalDateTime.parse(scanner.nextLine().trim(), GameSession.F);
-        if (!ketThuc.isAfter(batDau)) {
-            System.out.println("Lỗi: Giờ kết thúc phải sau giờ bắt đầu.");
-            return;
-        }
-
-        GameSession updatedSession = new GameSession(maPhien, maKH, maLane, batDau, ketThuc, 0.0);
-        gameSessionService.createOrUpdate(updatedSession);
-        System.out.println("Sửa phiên chơi thành công!");
+    System.out.print("Nhập mã phiên cần sửa: ");
+    String maPhien = scanner.nextLine().trim();
+    GameSession existingSession = gameSessionService.get(maPhien).orElse(null);
+    if (existingSession == null) {
+        System.out.println("Không tìm thấy phiên chơi!");
+        return;
     }
+
+    System.out.print("Nhập mã KH mới (hoặc Enter để giữ nguyên): ");
+    String maKH = scanner.nextLine().trim();
+    maKH = maKH.isEmpty() ? existingSession.getMaKH() : maKH;
+    if (maKH.isEmpty()) {
+        System.out.println("Lỗi: Mã KH không được để trống.");
+        return;
+    }
+
+    System.out.print("Nhập mã lane mới (hoặc Enter để giữ nguyên): ");
+    String maLane = scanner.nextLine().trim();
+    maLane = maLane.isEmpty() ? existingSession.getMaLane() : maLane;
+    if (maLane.isEmpty()) {
+        System.out.println("Lỗi: Mã lane không được để trống.");
+        return;
+    }
+
+    System.out.print("Nhập giờ bắt đầu mới (hoặc Enter để giữ nguyên, yyyy-MM-dd HH:mm): ");
+    String batDauInput = scanner.nextLine().trim();
+    LocalDateTime batDau = batDauInput.isEmpty() ? existingSession.getThoiGianBatDau() : LocalDateTime.parse(batDauInput, GameSession.F);
+
+    System.out.print("Nhập giờ kết thúc mới (hoặc Enter để giữ nguyên, yyyy-MM-dd HH:mm): ");
+    String ketThucInput = scanner.nextLine().trim();
+    LocalDateTime ketThuc = ketThucInput.isEmpty() ? existingSession.getThoiGianKetThuc() : LocalDateTime.parse(ketThucInput, GameSession.F);
+    if (!ketThuc.isAfter(batDau)) {
+        System.out.println("Lỗi: Giờ kết thúc phải sau giờ bắt đầu.");
+        return;
+    }
+
+    GameSession updatedSession = new GameSession(maPhien, maKH, maLane, batDau, ketThuc, 0.0);
+    gameSessionService.createOrUpdate(updatedSession);
+    System.out.println("Sửa phiên chơi thành công!");
+}
 
     private static void xoaPhienChoi() {
         System.out.print("Nhập mã phiên cần xóa: ");
@@ -647,46 +657,50 @@ public class Main {
     }
 
     private static void suaThueGiay() {
-        System.out.print("Nhập mã thuê cần sửa: ");
-        String maThue = scanner.nextLine().trim();
-        ShoeRental existingRental = shoeRentalService.find(maThue);
-        if (existingRental == null) {
-            System.out.println("Không tìm thấy thuê giày!");
-            return;
-        }
-
-        System.out.print("Nhập mã phiên mới (hoặc Enter để giữ nguyên): ");
-        String maPhien = scanner.nextLine().trim().isEmpty() ? existingRental.getMaPhien() : scanner.nextLine().trim();
-        if (!maPhien.isEmpty() && maPhien.isEmpty()) {
-            System.out.println("Lỗi: Mã phiên không được để trống.");
-            return;
-        }
-
-        System.out.print("Nhập size mới (hoặc Enter để giữ nguyên): ");
-        int size = scanner.nextLine().trim().isEmpty() ? existingRental.getSize() : Integer.parseInt(scanner.nextLine().trim());
-        if (!scanner.nextLine().trim().isEmpty() && size <= 0) {
-            System.out.println("Lỗi: Size phải là số dương.");
-            return;
-        }
-
-        System.out.print("Nhập giá mới (hoặc Enter để giữ nguyên): ");
-        double gia = scanner.nextLine().trim().isEmpty() ? existingRental.getGia() : Double.parseDouble(scanner.nextLine().trim());
-        if (!scanner.nextLine().trim().isEmpty() && gia <= 0) {
-            System.out.println("Lỗi: Giá phải là số dương.");
-            return;
-        }
-
-        System.out.print("Nhập trạng thái mới (còn/trả/mất/hỏng, hoặc Enter để giữ nguyên): ");
-        String trangThai = scanner.nextLine().trim().isEmpty() ? existingRental.getTrangThai() : scanner.nextLine().trim().toLowerCase();
-        if (!trangThai.isEmpty() && !shoeRentalService.isValidStatus(trangThai)) {
-            System.out.println("Lỗi: Trạng thái chỉ được là 'còn', 'trả', 'mất', hoặc 'hỏng'.");
-            return;
-        }
-
-        ShoeRental updatedRental = new ShoeRental(maThue, maPhien, size, gia, trangThai);
-        shoeRentalService.update(maThue, updatedRental);
-        System.out.println("Sửa thuê giày thành công!");
+    System.out.print("Nhập mã thuê cần sửa: ");
+    String maThue = scanner.nextLine().trim();
+    ShoeRental existingRental = shoeRentalService.find(maThue);
+    if (existingRental == null) {
+        System.out.println("Không tìm thấy thuê giày!");
+        return;
     }
+
+    System.out.print("Nhập mã phiên mới (hoặc Enter để giữ nguyên): ");
+    String maPhien = scanner.nextLine().trim();
+    maPhien = maPhien.isEmpty() ? existingRental.getMaPhien() : maPhien;
+    if (maPhien.isEmpty()) {
+        System.out.println("Lỗi: Mã phiên không được để trống.");
+        return;
+    }
+
+    System.out.print("Nhập size mới (hoặc Enter để giữ nguyên): ");
+    String sizeInput = scanner.nextLine().trim();
+    int size = sizeInput.isEmpty() ? existingRental.getSize() : Integer.parseInt(sizeInput);
+    if (!sizeInput.isEmpty() && size <= 0) {
+        System.out.println("Lỗi: Size phải là số dương.");
+        return;
+    }
+
+    System.out.print("Nhập giá mới (hoặc Enter để giữ nguyên): ");
+    String giaInput = scanner.nextLine().trim();
+    double gia = giaInput.isEmpty() ? existingRental.getGia() : Double.parseDouble(giaInput);
+    if (!giaInput.isEmpty() && gia <= 0) {
+        System.out.println("Lỗi: Giá phải là số dương.");
+        return;
+    }
+
+    System.out.print("Nhập trạng thái mới (còn/trả/mất/hỏng, hoặc Enter để giữ nguyên): ");
+    String trangThai = scanner.nextLine().trim();
+    trangThai = trangThai.isEmpty() ? existingRental.getTrangThai() : trangThai.toLowerCase();
+    if (!trangThai.isEmpty() && !shoeRentalService.isValidStatus(trangThai)) {
+        System.out.println("Lỗi: Trạng thái chỉ được là 'còn', 'trả', 'mất', hoặc 'hỏng'.");
+        return;
+    }
+
+    ShoeRental updatedRental = new ShoeRental(maThue, maPhien, size, gia, trangThai);
+    shoeRentalService.update(maThue, updatedRental);
+    System.out.println("Sửa thuê giày thành công!");
+}
 
     private static void xoaThueGiay() {
         System.out.print("Nhập mã thuê cần xóa: ");
@@ -816,47 +830,50 @@ public class Main {
         System.out.println("Thêm dịch vụ thành công!");
     }
 
-    private static void suaDichVu() {
-        System.out.print("Nhập mã DV cần sửa: ");
-        String maDV = scanner.nextLine().trim();
-        ServiceEntity existingService = serviceEntityService.find(maDV);
-        if (existingService == null) {
-            System.out.println("Không tìm thấy dịch vụ!");
-            return;
-        }
-
-        System.out.print("Nhập mã phiên mới (hoặc Enter để giữ nguyên): ");
-        String maPhien = scanner.nextLine().trim().isEmpty() ? existingService.getMaPhien() : scanner.nextLine().trim();
-        if (!maPhien.isEmpty() && maPhien.isEmpty()) {
-            System.out.println("Lỗi: Mã phiên không được để trống.");
-            return;
-        }
-
-        System.out.print("Nhập tên DV mới (hoặc Enter để giữ nguyên): ");
-        String tenDV = scanner.nextLine().trim().isEmpty() ? existingService.getTenDV() : scanner.nextLine().trim();
-        if (!tenDV.isEmpty() && tenDV.isEmpty()) {
-            System.out.println("Lỗi: Tên DV không được để trống.");
-            return;
-        }
-
-        System.out.print("Nhập số lượng mới (hoặc Enter để giữ nguyên): ");
-        int soLuong = scanner.nextLine().trim().isEmpty() ? existingService.getSoLuong() : Integer.parseInt(scanner.nextLine().trim());
-        if (!scanner.nextLine().trim().isEmpty() && soLuong <= 0) {
-            System.out.println("Lỗi: Số lượng phải là số dương.");
-            return;
-        }
-
-        System.out.print("Nhập đơn giá mới (hoặc Enter để giữ nguyên): ");
-        double gia = scanner.nextLine().trim().isEmpty() ? existingService.getGia() : Double.parseDouble(scanner.nextLine().trim());
-        if (!scanner.nextLine().trim().isEmpty() && gia <= 0) {
-            System.out.println("Lỗi: Đơn giá phải là số dương.");
-            return;
-        }
-
-        serviceEntityService.update(maDV, maPhien, tenDV, soLuong, gia);
-        System.out.println("Sửa dịch vụ thành công!");
+   private static void suaDichVu() {
+    System.out.print("Nhập mã DV cần sửa: ");
+    String maDV = scanner.nextLine().trim();
+    ServiceEntity existingService = serviceEntityService.find(maDV);
+    if (existingService == null) {
+        System.out.println("Không tìm thấy dịch vụ!");
+        return;
     }
 
+    System.out.print("Nhập mã phiên mới (hoặc Enter để giữ nguyên): ");
+    String maPhien = scanner.nextLine().trim();
+    maPhien = maPhien.isEmpty() ? existingService.getMaPhien() : maPhien;
+    if (maPhien.isEmpty()) {
+        System.out.println("Lỗi: Mã phiên không được để trống.");
+        return;
+    }
+
+    System.out.print("Nhập tên DV mới (hoặc Enter để giữ nguyên): ");
+    String tenDV = scanner.nextLine().trim();
+    tenDV = tenDV.isEmpty() ? existingService.getTenDV() : tenDV;
+    if (tenDV.isEmpty()) {
+        System.out.println("Lỗi: Tên DV không được để trống.");
+        return;
+    }
+
+    System.out.print("Nhập số lượng mới (hoặc Enter để giữ nguyên): ");
+    String soLuongInput = scanner.nextLine().trim();
+    int soLuong = soLuongInput.isEmpty() ? existingService.getSoLuong() : Integer.parseInt(soLuongInput);
+    if (!soLuongInput.isEmpty() && soLuong <= 0) {
+        System.out.println("Lỗi: Số lượng phải là số dương.");
+        return;
+    }
+
+    System.out.print("Nhập đơn giá mới (hoặc Enter để giữ nguyên): ");
+    String giaInput = scanner.nextLine().trim();
+    double gia = giaInput.isEmpty() ? existingService.getGia() : Double.parseDouble(giaInput);
+    if (!giaInput.isEmpty() && gia <= 0) {
+        System.out.println("Lỗi: Đơn giá phải là số dương.");
+        return;
+    }
+
+    serviceEntityService.update(maDV, maPhien, tenDV, soLuong, gia);
+    System.out.println("Sửa dịch vụ thành công!");
+}
     private static void xoaDichVu() {
         System.out.print("Nhập mã DV cần xóa: ");
         String maDV = scanner.nextLine().trim();
