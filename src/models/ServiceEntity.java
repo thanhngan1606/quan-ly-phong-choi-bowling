@@ -9,7 +9,6 @@ public class ServiceEntity {
     private double thanhTien;
 
     public ServiceEntity() {}
-
     public ServiceEntity(String maDV, String maPhien, String tenDV, int soLuong, double gia) {
         this.maDV = maDV;
         this.maPhien = maPhien;

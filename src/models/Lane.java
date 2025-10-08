@@ -14,6 +14,7 @@ public class Lane {
         this.gia = gia;
         this.baoTri = baoTri;
     }
+    
 
     public String getMaLane() { return maLane; }
     public void setMaLane(String maLane) { this.maLane = maLane; }
