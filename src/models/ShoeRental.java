@@ -1,17 +1,18 @@
 package models;
 
 public class ShoeRental {
-    private String MaThue;
-    private String MaPhien;
-    private int Size;
-    private double Gia;
-
+    private String maThue;
+    private String maPhien;
+    private int size;
+    private double gia;
+public String trangThai;
     public ShoeRental() {}
-    public ShoeRental(String MaThue, String MaPhien, int Size, double Gia) {
-        this.MaThue = MaThue;
-        this.MaPhien= MaPhien;
-        this.Size = Size;
-        this.Gia = Gia;
+    public ShoeRental(String maThue, String maPhien, int size, double gia, String trangThai) {
+        this.maThue = maThue;
+        this.maPhien= maPhien;
+        this.size = size;
+        this.gia = gia;
+        this.trangThai=trangThai;
     }
 
     // Getter / Setter ...

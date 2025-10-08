@@ -1,79 +1,153 @@
-import models.*;
-import service.*;
-
-import java.nio.file.Path;
+import models.Lane;
+import service.LaneService;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         // Khởi tạo service với file dữ liệu
-        
-
+ 
         Scanner sc = new Scanner(System.in);
         int choice;
+    private static LaneService laneService = new LaneService();
+    private static Scanner scanner = new Scanner(System.in);
 
-        do {
-            System.out.println("\n=== HỆ THỐNG QUẢN LÝ BOWLING ===");
-            System.out.println("1. Quản lý khách hàng");
-            System.out.println("2. Quản lý đường bowling (Lane)");
-            System.out.println("3. Quản lý dịch vụ (ServiceEntity)");
-            System.out.println("4. Quản lý thuê giày (ShoeRental)");
-            System.out.println("5. Quản lý phiên chơi (GameSession)");
+
+    public static void main(String[] args) {
+        while (true) {
+            System.out.println("=== QUẢN LÝ ĐƯỜNG BOWLING ===");
+            System.out.println("1. Thêm lane mới");
+            System.out.println("2. Sửa lane");
+            System.out.println("3. Xóa lane");
+            System.out.println("4. Tìm kiếm lane (theo mã, tên, hoặc trạng thái)");
+            System.out.println("5. Hiển thị tất cả lane");
+            System.out.println("6. Quản lý trạng thái lane");
             System.out.println("0. Thoát");
-            System.out.print("Chọn: ");
-            choice = Integer.parseInt(sc.nextLine());
+            System.out.print("Chọn chức năng: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Xóa bộ đệm
 
             switch (choice) {
-                case 1 -> customerMenu(customerService, sc);
-                case 2 -> laneMenu(laneService, sc);
-                case 3 -> serviceEntityMenu(serviceEntityService, sc);
-                case 4 -> shoeRentalMenu(shoeRentalService, sc);
-                case 5 -> gameSessionMenu(gameSessionService, sc);
-                case 0 -> System.out.println("Thoát chương trình!");
-                default -> System.out.println("Lựa chọn không hợp lệ!");
+                case 1:
+                    themLaneMoi();
+                    break;
+                case 2:
+                    suaLane();
+                    break;
+                case 3:
+                    xoaLane();
+                    break;
+                case 4:
+                    timKiemLane();
+                    break;
+                case 5:
+                    hienThiTatCaLane();
+                    break;
+                case 6:
+                    quanLyTrangThai();
+                    break;
+                case 0:
+                    System.out.println("Thoát chương trình.");
+                    return;
+                default:
+                    System.out.println("Lựa chọn không hợp lệ!");
             }
-        } while (choice != 0);
-    }
-
-    // ==== MENU KHÁCH HÀNG ====
-    private static void customerMenu(CustomerService service, Scanner sc) {
-        System.out.println("\n--- QUẢN LÝ KHÁCH HÀNG ---");
-        System.out.println("1. Thêm / Sửa");
-        System.out.println("2. Xóa");
-        System.out.println("3. Tìm kiếm");
-        System.out.println("4. Danh sách");
-        System.out.print("Chọn: ");
-        int c = Integer.parseInt(sc.nextLine());
-
-        switch (c) {
-            case 1 -> { /* TODO: gọi service.createOrUpdate() */ }
-            case 2 -> { /* TODO: gọi service.delete() */ }
-            case 3 -> { /* TODO: gọi service.get() */ }
-            case 4 -> { /* TODO: gọi service.list() */ }
         }
     }
 
-    // ==== MENU LANE ====
-    private static void laneMenu(LaneService service, Scanner sc) {
-        System.out.println("\n--- QUẢN LÝ LANE ---");
-        // TODO: tương tự customerMenu
+    private static void themLaneMoi() {
+        System.out.print("Nhập mã lane: ");
+        String maLane = scanner.nextLine();
+        System.out.print("Nhập tên lane: ");
+        String tenLane = scanner.nextLine();
+        System.out.print("Nhập trạng thái (trống/đang chơi/bảo trì): ");
+        String trangThai = scanner.nextLine();
+        System.out.print("Nhập giá/giờ: ");
+        double giaGio = scanner.nextDouble();
+        scanner.nextLine(); // Xóa bộ đệm
+        System.out.print("Nhập thông tin bảo trì: ");
+        String baoTri = scanner.nextLine();
+
+        Lane lane = new Lane(maLane, tenLane, trangThai, giaGio, baoTri);
+        laneService.saveLane(lane);
+        System.out.println("Thêm lane thành công!");
     }
 
-    // ==== MENU SERVICE ENTITY ====
-    private static void serviceEntityMenu(ServiceEntityService service, Scanner sc) {
-        System.out.println("\n--- QUẢN LÝ DỊCH VỤ ---");
-        // TODO: tương tự customerMenu
+    private static void suaLane() {
+        System.out.print("Nhập mã lane cần sửa: ");
+        String maLane = scanner.nextLine();
+        Lane existingLane = laneService.findLanes(maLane, null).get(0); // Lấy lane đầu tiên khớp
+        if (existingLane == null) {
+            System.out.println("Không tìm thấy lane!");
+            return;
+        }
+
+        System.out.print("Nhập tên mới (hoặc Enter để giữ nguyên): ");
+        String tenLane = scanner.nextLine().isEmpty() ? existingLane.getTenLane() : scanner.nextLine();
+        System.out.print("Nhập trạng thái mới (hoặc Enter để giữ nguyên): ");
+        String trangThai = scanner.nextLine().isEmpty() ? existingLane.getTrangThai() : scanner.nextLine();
+        System.out.print("Nhập giá/giờ mới (hoặc Enter để giữ nguyên): ");
+        double giaGio = scanner.nextLine().isEmpty() ? existingLane.getGiaGio() : scanner.nextDouble();
+        scanner.nextLine(); // Xóa bộ đệm
+        System.out.print("Nhập thông tin bảo trì mới (hoặc Enter để giữ nguyên): ");
+        String baoTri = scanner.nextLine().isEmpty() ? existingLane.getBaoTri() : scanner.nextLine();
+
+        Lane updatedLane = new Lane(maLane, tenLane, trangThai, giaGio, baoTri);
+        laneService.updateLane(maLane, updatedLane);
+        System.out.println("Sửa lane thành công!");
     }
 
-    // ==== MENU SHOE RENTAL ====
-    private static void shoeRentalMenu(ShoeRentalService service, Scanner sc) {
-        System.out.println("\n--- QUẢN LÝ THUÊ GIÀY ---");
-        // TODO: tương tự customerMenu
+    private static void xoaLane() {
+        System.out.print("Nhập mã lane cần xóa: ");
+        String maLane = scanner.nextLine();
+        laneService.deleteLane(maLane);
+        System.out.println("Xóa lane thành công!");
     }
 
-    // ==== MENU GAME SESSION ====
-    private static void gameSessionMenu(GameSessionService service, Scanner sc) {
-        System.out.println("\n--- QUẢN LÝ PHIÊN CHƠI ---");
-        // TODO: tương tự customerMenu
+    private static void timKiemLane() {
+        System.out.print("Nhập mã hoặc tên lane để tìm kiếm (hoặc Enter để bỏ qua): ");
+        String searchTerm = scanner.nextLine();
+        System.out.print("Nhập trạng thái (trống/đang chơi/bảo trì, hoặc Enter để bỏ qua): ");
+        String trangThai = scanner.nextLine();
+
+        List<Lane> lanes = laneService.findLanes(searchTerm, trangThai);
+        if (lanes.isEmpty()) {
+            System.out.println("Không tìm thấy lane nào!");
+        } else {
+            System.out.println("Kết quả tìm kiếm:");
+            for (Lane lane : lanes) {
+                System.out.println(lane);
+            }
+        }
+    }
+
+    private static void hienThiTatCaLane() {
+        List<Lane> lanes = laneService.getAllLanes();
+        if (lanes.isEmpty()) {
+            System.out.println("Không có lane nào!");
+        } else {
+            System.out.println("Danh sách lane:");
+            for (Lane lane : lanes) {
+                System.out.println(lane);
+            }
+        }
+    }
+
+    private static void quanLyTrangThai() {
+        System.out.print("Nhập mã lane để quản lý trạng thái: ");
+        String maLane = scanner.nextLine();
+        Lane lane = laneService.findLanes(maLane, null).get(0); // Lấy lane đầu tiên khớp
+        if (lane == null) {
+            System.out.println("Không tìm thấy lane!");
+            return;
+        }
+
+        System.out.println("Trạng thái hiện tại: " + lane.getTrangThai());
+        System.out.print("Nhập trạng thái mới (trống/đang chơi/bảo trì): ");
+        String newTrangThai = scanner.nextLine();
+        lane.setTrangThai(newTrangThai);
+        laneService.updateLane(maLane, lane);
+        System.out.println("Cập nhật trạng thái thành công!");
     }
 }
