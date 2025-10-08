@@ -1,40 +1,45 @@
 package service;
 
-import models.ServiceEntity;
-import java.io.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
+import models.*;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public class ServiceEntityService {
-    private Path filePath;
-    private List<ServiceEntity> services = new ArrayList<>();
+    private static LaneService laneService = new LaneService();
+    private static GameSessionService gameSessionService = new GameSessionService(
+        java.nio.file.Paths.get("C://dev//quan-ly-phong-choi-bowling//data//src//gamesession.txt"),
+        laneId -> laneService.findLanes(laneId, null).stream().findFirst()
+                .map(Lane::getGiaGio).orElse(0.0)
+    );
+    private static ShoeRentalService shoeRentalService = new ShoeRentalService();
+    private java.nio.file.Path filePath;
+    private java.util.List<ServiceEntity> services = new java.util.ArrayList<>();
 
     public ServiceEntityService(String filePathStr) {
-        this.filePath = Paths.get(filePathStr);
+        this.filePath = java.nio.file.Paths.get(filePathStr);
+        loadFromFile();
     }
 
     @SuppressWarnings("unchecked")
     public void loadFromFile() {
         services.clear();
-        File file = new File(filePath.toString());
+        java.io.File file = new java.io.File(filePath.toString());
         if (!file.exists()) {
             System.out.println("File dữ liệu không tồn tại, khởi tạo danh sách trống.");
             return;
         }
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath.toString()))) {
-            services = (List<ServiceEntity>) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
+        try (java.io.ObjectInputStream ois = new java.io.ObjectInputStream(new java.io.FileInputStream(filePath.toString()))) {
+            services = (java.util.List<ServiceEntity>) ois.readObject();
+        } catch (java.io.IOException | java.lang.ClassNotFoundException e) {
             System.out.println("Error reading file: " + e.getMessage());
         }
     }
 
     public void saveToFile() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath.toString()))) {
+        try (java.io.ObjectOutputStream oos = new java.io.ObjectOutputStream(new java.io.FileOutputStream(filePath.toString()))) {
             oos.writeObject(services);
             System.out.println("Data saved to file: " + filePath);
-        } catch (IOException e) {
+        } catch (java.io.IOException e) {
             System.out.println("Error writing file: " + e.getMessage());
         }
     }
@@ -65,11 +70,11 @@ public class ServiceEntityService {
         return null;
     }
 
-    public List<ServiceEntity> findAll() {
-        return new ArrayList<>(services);
+    public java.util.List<ServiceEntity> findAll() {
+        return new java.util.ArrayList<>(services);
     }
 
-    public List<ServiceEntity> searchByCriteria(String searchTerm) {
+    public java.util.List<ServiceEntity> searchByCriteria(String searchTerm) {
         return services.stream()
                 .filter(s -> s.getTenDV().toLowerCase().contains(searchTerm.toLowerCase()) ||
                         s.getMaPhien().contains(searchTerm))
@@ -103,29 +108,47 @@ public class ServiceEntityService {
         }
     }
 
-    public List<ServiceEntity> findByName(String keyword) {
-        List<ServiceEntity> result = new ArrayList<>();
-        if (keyword == null || keyword.trim().isEmpty()) return result;
+    public static double calculateTotalCost(List<String> sessionIds, List<String> rentalIds, List<String> serviceIds) {
+        double totalCost = 0.0;
 
-        String keyLower = keyword.toLowerCase();
-        for (ServiceEntity s : services) {
-            if (s.getTenDV() != null && s.getTenDV().toLowerCase().contains(keyLower)) {
-                result.add(s);
+        // Tính chi phí chơi bowling
+        for (String maPhien : sessionIds) {
+            GameSession session = gameSessionService.get(maPhien).orElse(null);
+            if (session != null) {
+                String maLane = session.getMaLane();
+                Lane lane = laneService.findLanes(maLane, null).stream().findFirst().orElse(null);
+                if (lane != null) {
+                    long hours = ChronoUnit.HOURS.between(session.getThoiGianBatDau(), session.getThoiGianKetThuc());
+                    if (hours < 0) hours = 0; // Xử lý trường hợp thời gian không hợp lệ
+                    double cost = lane.getGiaGio() * hours;
+                    totalCost += cost;
+                    System.out.printf("Chi phí chơi lane %s: %.2f VNĐ (%.2f x %d giờ)%n",
+                            maLane, cost, lane.getGiaGio(), hours);
+                }
             }
         }
-        return result;
-    }
 
-    public void printSearchResult(List<ServiceEntity> list) {
-        if (list.isEmpty()) {
-            System.out.println("No matching service found.");
-        } else {
-            System.out.println("\n--- SEARCH RESULTS ---");
-            for (ServiceEntity s : list) {
-                System.out.printf("%-6s | %-6s | %-15s | Qty: %-3d | Price: %-8.2f | Total: %.2f%n",
-                        s.getMaDV(), s.getMaPhien(), s.getTenDV(),
-                        s.getSoLuong(), s.getGia(), s.getThanhTien());
+        // Tính chi phí thuê giày
+        for (String maThue : rentalIds) {
+            ShoeRental rental = shoeRentalService.find(maThue);
+            if (rental != null && rental.getTrangThai().equalsIgnoreCase("còn")) {
+                totalCost += rental.getGia();
+                System.out.printf("Chi phí thuê giày %s: %.2f VNĐ%n", maThue, rental.getGia());
             }
         }
+
+        // Tính chi phí dịch vụ
+        ServiceEntityService serviceEntityService = new ServiceEntityService("C://dev//quan-ly-phong-choi-bowling//data//src//service.txt");
+        for (String maDV : serviceIds) {
+            ServiceEntity service = serviceEntityService.find(maDV);
+            if (service != null) {
+                double serviceCost = service.getSoLuong() * service.getGia();
+                totalCost += serviceCost;
+                System.out.printf("Chi phí dịch vụ %s: %.2f VNĐ (%d x %.2f)%n",
+                        maDV, serviceCost, service.getSoLuong(), service.getGia());
+            }
+        }
+
+        return Math.round(totalCost * 100.0) / 100.0; // Làm tròn 2 chữ số thập phân
     }
 }

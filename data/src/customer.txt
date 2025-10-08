@@ -1,3 +1,0 @@
-C001|Nguyễn Thị Thanh Ngân|0978896072|Yes|10
-C002|Nguyễn văn Minh|0900000000|No|0
-C003|Nguyễn Thị Lan|0911111111|Yes|25
