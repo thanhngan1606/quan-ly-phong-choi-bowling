@@ -107,48 +107,4 @@ public class ServiceEntityService {
             System.out.println("Service with ID " + ma + " not found");
         }
     }
-
-    public static double calculateTotalCost(List<String> sessionIds, List<String> rentalIds, List<String> serviceIds) {
-        double totalCost = 0.0;
-
-        // Tính chi phí chơi bowling
-        for (String maPhien : sessionIds) {
-            GameSession session = gameSessionService.get(maPhien).orElse(null);
-            if (session != null) {
-                String maLane = session.getMaLane();
-                Lane lane = laneService.findLanes(maLane, null).stream().findFirst().orElse(null);
-                if (lane != null) {
-                    long hours = ChronoUnit.HOURS.between(session.getThoiGianBatDau(), session.getThoiGianKetThuc());
-                    if (hours < 0) hours = 0; // Xử lý trường hợp thời gian không hợp lệ
-                    double cost = lane.getGiaGio() * hours;
-                    totalCost += cost;
-                    System.out.printf("Chi phí chơi lane %s: %.2f VNĐ (%.2f x %d giờ)%n",
-                            maLane, cost, lane.getGiaGio(), hours);
-                }
-            }
-        }
-
-        // Tính chi phí thuê giày
-        for (String maThue : rentalIds) {
-            ShoeRental rental = shoeRentalService.find(maThue);
-            if (rental != null && rental.getTrangThai().equalsIgnoreCase("còn")) {
-                totalCost += rental.getGia();
-                System.out.printf("Chi phí thuê giày %s: %.2f VNĐ%n", maThue, rental.getGia());
-            }
-        }
-
-        // Tính chi phí dịch vụ
-        ServiceEntityService serviceEntityService = new ServiceEntityService("C://dev//quan-ly-phong-choi-bowling//data//src//service.txt");
-        for (String maDV : serviceIds) {
-            ServiceEntity service = serviceEntityService.find(maDV);
-            if (service != null) {
-                double serviceCost = service.getSoLuong() * service.getGia();
-                totalCost += serviceCost;
-                System.out.printf("Chi phí dịch vụ %s: %.2f VNĐ (%d x %.2f)%n",
-                        maDV, serviceCost, service.getSoLuong(), service.getGia());
-            }
-        }
-
-        return Math.round(totalCost * 100.0) / 100.0; // Làm tròn 2 chữ số thập phân
-    }
 }
