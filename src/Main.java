@@ -1,4 +1,5 @@
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import models.*;
 import service.*;
@@ -58,7 +59,7 @@ public class Main {
 
     private static void manageLane() {
         while (true) {
-            laneService.updateLaneStatusFromSessions(gameSessionService.list());
+            // laneService.updateLaneStatusFromSessions(gameSessionService.list());
             System.out.println("=== QUẢN LÝ ĐƯỜNG BOWLING ===");
             System.out.println("1. Thêm lane mới");
             System.out.println("2. Sửa lane");
@@ -103,9 +104,6 @@ public class Main {
             return;
         } else if (maLane.isEmpty()) {
             System.out.println("Lỗi: Mã lane không được để trống.");
-            return;
-        } else if (!maLane.matches("L\\d{3}")) {
-            System.out.println("Lỗi: Mã lane phải có định dạng Lxxx (x là chữ số).");
             return;
         }
 
@@ -467,6 +465,7 @@ public class Main {
 
         GameSession session = new GameSession(maPhien, maKH, maLane, batDau, ketThuc, 0.0);
         gameSessionService.createOrUpdate(session);
+        laneService.updateLaneStatusFromSessions(gameSessionService.list());
         System.out.println("Thêm phiên chơi thành công!");
     }
 
@@ -901,103 +900,68 @@ public class Main {
         }
     }
 
-    private static void tinhTongChiPhi() {
-        List<String> selectedSessionIds = new ArrayList<>();
-        List<String> selectedRentalIds = new ArrayList<>();
-        List<String> selectedServiceIds = new ArrayList<>();
+private static double tinhTongChiPhi() {
+    Scanner scanner = new Scanner(System.in);
+    System.out.print("Nhập mã phiên (maPhien) để tính tổng chi phí: ");
+    String maPhien = scanner.nextLine().trim();
 
-        // Chọn phiên chơi
-        List<GameSession> sessions = gameSessionService.list();
-        if (!sessions.isEmpty()) {
-            System.out.println("\n--- DANH SÁCH PHIÊN CHƠI CÓ SẴN ---");
-            for (int i = 0; i < sessions.size(); i++) {
-                GameSession s = sessions.get(i);
-                System.out.printf("%d. Mã Phiên: %-6s | Mã Lane: %-6s | Thời gian: %s - %s%n",
-                        i + 1, s.getMaPhien(), s.getMaLane(), s.getThoiGianBatDau(), s.getThoiGianKetThuc());
-            }
-            while (true) {
-                System.out.print("Nhập số thứ tự phiên chơi để chọn (0 để bỏ qua): ");
-                int choice = scanner.nextInt();
-                scanner.nextLine(); // Xóa bộ đệm
-                if (choice == 0) break;
-                if (choice < 1 || choice > sessions.size()) {
-                    System.out.println("Lựa chọn không hợp lệ! Vui lòng chọn lại.");
-                    continue;
-                }
-                String maPhien = sessions.get(choice - 1).getMaPhien();
-                if (!selectedSessionIds.contains(maPhien)) {
-                    selectedSessionIds.add(maPhien);
-                    System.out.println("Đã chọn phiên: " + maPhien);
-                } else {
-                    System.out.println("Phiên đã được chọn trước đó!");
-                }
-            }
-        } else {
-            System.out.println("Không có phiên chơi nào để tính phí!");
-        }
+    // Lấy tất cả dữ liệu liên quan
+    List<GameSession> sessions = gameSessionService.list();
+    List<ShoeRental> rentals = shoeRentalService.findAll();
+    List<ServiceEntity> services = serviceEntityService.findAll();
 
-        // Chọn thuê giày
-        List<ShoeRental> rentals = shoeRentalService.findAll();
-        if (!rentals.isEmpty()) {
-            System.out.println("\n--- DANH SÁCH THUÊ GIÀY CÓ SẴN ---");
-            for (int i = 0; i < rentals.size(); i++) {
-                ShoeRental r = rentals.get(i);
-                System.out.printf("%d. Mã Thuê: %-6s | Mã Phiên: %-6s | Size: %-3d | Giá: %-8.2f | Trạng thái: %s%n",
-                        i + 1, r.getMaThue(), r.getMaPhien(), r.getSize(), r.getGia(), r.getTrangThai());
-            }
-            while (true) {
-                System.out.print("Nhập số thứ tự thuê giày để chọn (0 để bỏ qua): ");
-                int choice = scanner.nextInt();
-                scanner.nextLine(); // Xóa bộ đệm
-                if (choice == 0) break;
-                if (choice < 1 || choice > rentals.size()) {
-                    System.out.println("Lựa chọn không hợp lệ! Vui lòng chọn lại.");
-                    continue;
-                }
-                String maThue = rentals.get(choice - 1).getMaThue();
-                if (!selectedRentalIds.contains(maThue)) {
-                    selectedRentalIds.add(maThue);
-                    System.out.println("Đã chọn thuê giày: " + maThue);
-                } else {
-                    System.out.println("Thuê giày đã được chọn trước đó!");
-                }
-            }
-        } else {
-            System.out.println("Không có thuê giày nào để tính phí!");
-        }
+    double totalCost = 0.0;
+    GameSession session = sessions.stream().filter(s -> s.getMaPhien().equalsIgnoreCase(maPhien)).findFirst().orElse(null);
 
-        // Chọn dịch vụ
-        List<ServiceEntity> services = serviceEntityService.findAll();
-        if (!services.isEmpty()) {
-            System.out.println("\n--- DANH SÁCH DỊCH VỤ CÓ SẴN ---");
-            for (int i = 0; i < services.size(); i++) {
-                ServiceEntity s = services.get(i);
-                System.out.printf("%d. Mã DV: %-6s | Mã Phiên: %-6s | Tên: %-15s | Qty: %-3d | Giá: %-8.2f%n",
-                        i + 1, s.getMaDV(), s.getMaPhien(), s.getTenDV(), s.getSoLuong(), s.getGia());
-            }
-            while (true) {
-                System.out.print("Nhập số thứ tự dịch vụ để chọn (0 để bỏ qua): ");
-                int choice = scanner.nextInt();
-                scanner.nextLine(); // Xóa bộ đệm
-                if (choice == 0) break;
-                if (choice < 1 || choice > services.size()) {
-                    System.out.println("Lựa chọn không hợp lệ! Vui lòng chọn lại.");
-                    continue;
-                }
-                String maDV = services.get(choice - 1).getMaDV();
-                if (!selectedServiceIds.contains(maDV)) {
-                    selectedServiceIds.add(maDV);
-                    System.out.println("Đã chọn dịch vụ: " + maDV);
-                } else {
-                    System.out.println("Dịch vụ đã được chọn trước đó!");
-                }
-            }
-        } else {
-            System.out.println("Không có dịch vụ nào để tính phí!");
-        }
-
-        // Tính tổng chi phí
-        double totalCost = ServiceEntityService.calculateTotalCost(selectedSessionIds, selectedRentalIds, selectedServiceIds);
-        System.out.printf("\nTổng chi phí: %.2f VNĐ%n", totalCost);
+    if (session == null) {
+        System.out.println("Không tìm thấy phiên chơi với mã " + maPhien + "!");
+        return 0.0;
     }
+
+    // Tính chi phí từ phiên chơi
+    String maLane = session.getMaLane();
+    Lane lane = laneService.findLanes(maLane, null).stream().findFirst().orElse(null);
+    if (lane != null) {
+        long hours = ChronoUnit.HOURS.between(session.getThoiGianBatDau(), session.getThoiGianKetThuc());
+        if (hours < 0) hours = 0; // Xử lý thời gian không hợp lệ
+        double cost = lane.getGiaGio() * hours;
+        totalCost += cost;
+        System.out.printf("Chi phí chơi lane %s: %.2f VNĐ (%.2f x %d giờ)%n", maLane, cost, lane.getGiaGio(), hours);
+    }
+
+    // Tính chi phí từ các thuê giày có cùng mã phiên
+    for (ShoeRental rental : rentals) {
+        if (rental.getMaPhien() != null && rental.getMaPhien().equalsIgnoreCase(maPhien)) {
+            if (rental.getTrangThai().equalsIgnoreCase("còn")) {
+                totalCost += rental.getGia();
+                System.out.printf("Chi phí thuê giày %s: %.2f VNĐ%n", rental.getMaThue(), rental.getGia());
+            }
+        }
+    }
+
+    // Tính chi phí từ các dịch vụ có cùng mã phiên
+    for (ServiceEntity service : services) {
+        if (service.getMaPhien() != null && service.getMaPhien().equalsIgnoreCase(maPhien)) {
+            double serviceCost = service.getSoLuong() * service.getGia();
+            totalCost += serviceCost;
+            System.out.printf("Chi phí dịch vụ %s: %.2f VNĐ (%d x %.2f)%n", service.getMaDV(), serviceCost, service.getSoLuong(), service.getGia());
+        }
+    }
+
+    if (totalCost == 0.0) {
+        System.out.println("Không tìm thấy dữ liệu thanh toán cho phiên " + maPhien + "!");
+    } else {
+        totalCost = Math.round(totalCost * 100.0) / 100.0; // Làm tròn 2 chữ số thập phân
+        System.out.printf("\nTổng chi phí cho phiên %s: %.2f VNĐ%n", maPhien, totalCost);
+
+        // Cập nhật trạng thái lane thành "trống" sau khi tính tiền
+        if (lane != null && lane.getTrangThai().equalsIgnoreCase("đang chơi")) {
+            lane.setTrangThai("trống");
+            laneService.updateLane(maLane, lane);
+            System.out.println("Đã cập nhật trạng thái lane " + maLane + " thành 'trống'.");
+        }
+    }
+
+    return totalCost;
+}
 }
